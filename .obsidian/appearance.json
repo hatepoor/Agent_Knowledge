@@ -1,0 +1,9 @@
+{
+  "cssTheme": "Minimal",
+  "theme": "obsidian",
+  "interfaceFontFamily": "Candara",
+  "monospaceFontFamily": "Consolas",
+  "baseFontSize": 21,
+  "baseFontSizeAction": true,
+  "enabledCssSnippets": []
+}

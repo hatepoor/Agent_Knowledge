@@ -1,0 +1,4 @@
+*.py
+.claudian/
+.workbuddy/
+.obsidian/plugins/obsidian-local-rest-api/data.json

@@ -1,0 +1,232 @@
+{
+  "main": {
+    "id": "6f21b68c8993caa4",
+    "type": "split",
+    "children": [
+      {
+        "id": "80e2c98e47031e64",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "79b012450cdddaa2",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "新标签页"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "4c7da9e5d0963570",
+    "type": "split",
+    "children": [
+      {
+        "id": "c55dd997dda98af4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "204d6dd8673c87b1",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "027f2adadd088c42",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "mcp",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "2c5e780b12a7058d",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 294.5110321044922
+  },
+  "right": {
+    "id": "ab1ae89904c653f2",
+    "type": "split",
+    "children": [
+      {
+        "id": "7986e5deda3451ce",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "eb317ea39ca0acea",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "wiki/langchain/modules/langchain_runnables/RunnableWithMessageHistory.md",
+                "collapseAll": true,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "RunnableWithMessageHistory 的反向链接列表"
+            }
+          },
+          {
+            "id": "e840db3875ff9df1",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "wiki/langchain/memory/短期记忆.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "短期记忆 的出链列表"
+            }
+          },
+          {
+            "id": "ec9489499a29d5ea",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "95fefea1fa9262e5",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "349287e4a4c551b2",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "wiki/langchain/modules/langchain_embeddings/OpenAIEmbeddings.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "OpenAIEmbeddings 的大纲"
+            }
+          },
+          {
+            "id": "88ef527a29cab33b",
+            "type": "leaf",
+            "state": {
+              "type": "claudian-view",
+              "state": {},
+              "icon": "bot",
+              "title": "Claudian"
+            }
+          }
+        ],
+        "currentTab": 4
+      }
+    ],
+    "direction": "horizontal",
+    "width": 393.5,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "realclaudian:Open Claudian": false
+    }
+  },
+  "active": "79b012450cdddaa2",
+  "lastOpenFiles": [
+    "wiki/agent/skills/Skills实现与集成.md",
+    "my_agend_study_knowledge/test_regex.py",
+    "my_agend_study_knowledge/SCHEMA.md",
+    "my_agend_study_knowledge/README.md",
+    "my_agend_study_knowledge/log.md",
+    "my_agend_study_knowledge/lint_kb_v2.py",
+    "my_agend_study_knowledge/lint_kb.py",
+    "my_agend_study_knowledge/index.md",
+    "my_agend_study_knowledge/fix_links.py",
+    "my_agend_study_knowledge/find_inmemory.py",
+    "my_agend_study_knowledge/find_gailan.py",
+    "my_agend_study_knowledge/find_backslash_bracket.py",
+    "my_agend_study_knowledge/find_backslash.py",
+    "my_agend_study_knowledge/find_all_pipe_escape.py",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_subgraph/概述.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_subgraph/子图组合模式.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_streaming/流式模式对比.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_streaming/概述.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_streaming/异步流式.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_multi_agent/网络模式.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_multi_agent/概述.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_multi_agent/层级模式.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_multi_agent/主管模式.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_state/状态更新模式.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_state/状态定义.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_state/Reducer.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_state/概述.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_human_in_loop/概述.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_human_in_loop/审批工作流.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_human_in_loop/interrupt机制.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_core/错误处理与恢复.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_checkpoint/SqliteSaver.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_core/边.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_core/节点.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_core/编译与执行.md",
+    "my_agend_study_knowledge/wiki/langgraph/modules/langgraph_subgraph"
+  ]
+}

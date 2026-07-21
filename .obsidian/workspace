@@ -1,0 +1,138 @@
+{
+  "main": {
+    "id": "4033fccbe5c7509c",
+    "type": "split",
+    "children": [
+      {
+        "id": "e32ef1ecca20fd54",
+        "type": "leaf",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "java/概念性知识.md",
+            "mode": "source",
+            "source": false
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "df36142aca77a8cb",
+    "type": "split",
+    "children": [
+      {
+        "id": "4e907bd019759c52",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "85c2e03c6cbe2108",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "1e9d93cae9bd57a1",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "cdd994bac6078015",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "0dea9710299d90b2",
+    "type": "split",
+    "children": [
+      {
+        "id": "f899dea493c13a02",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3a2361d6472b50db",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "java/概念性知识.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "255dc8441b750cfc",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "java/概念性知识.md",
+                "linksCollapsed": true,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "a4749c16c2fc89d6",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "a02350031aec8843",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "java/概念性知识.md"
+              }
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "active": "e32ef1ecca20fd54",
+  "lastOpenFiles": [
+    "java/java注解.md",
+    "java/概念性知识.md",
+    "未命名.md",
+    "java/登录相关.md"
+  ]
+}

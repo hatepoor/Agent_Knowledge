@@ -1,0 +1,17 @@
+/* 缩小文件树宽度，给内容区腾空间 */
+.workspace-split.mod-left-split {
+    width: 180px !important;  /* 默认约 250px，改小 */
+}
+
+/* 扩大内容区最大宽度 */
+.markdown-source-view .cm-content,
+.markdown-preview-view {
+    max-width: 95% !important;  /* 默认约 700px，改大 */
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* 可选：隐藏面包屑导航（你图里 wiki > python > ... 那行） */
+.obsidian-breadcrumbs {
+    display: none;
+}
