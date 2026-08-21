@@ -20,6 +20,7 @@ wiki/langgraph/modules/
 │   ├── 节点.md
 │   ├── 边.md
 │   ├── 编译与执行.md
+│   ├── 并行执行模型.md              # 超级步骤、同步 vs 异步
 │   ├── 错误处理与恢复.md
 │   ├── Command与状态更新.md
 │   └── 可视化与调试.md
@@ -60,6 +61,10 @@ wiki/langgraph/modules/
 - [[langgraph/modules/langgraph_core/节点|节点]]
 - [[langgraph/modules/langgraph_core/边|边]]
 - [[langgraph/modules/langgraph_core/编译与执行|编译与执行]]
+- [[langgraph/modules/langgraph_core/并行执行模型|并行执行模型]]
+- [[langgraph/modules/langgraph_core/错误处理与恢复|错误处理与恢复]]
+- [[langgraph/modules/langgraph_core/Command与状态更新|Command 与状态更新]]
+- [[langgraph/modules/langgraph_core/可视化与调试|可视化与调试]]
 
 ### langgraph_state — 状态管理
 - [[langgraph/modules/langgraph_state/概述|概述]]
@@ -93,6 +98,14 @@ wiki/langgraph/modules/
 ### langgraph_subgraph — 子图
 - [[langgraph/modules/langgraph_subgraph/概述|概述]]
 - [[langgraph/modules/langgraph_subgraph/子图组合模式|子图组合模式]]
+
+### tutorial — 实战教程
+- [[langgraph/tutorial/综合示例_全概念演示|综合示例：一个文件串起全部概念]] ⭐ 最小演示盘
+- [[langgraph/tutorial/ReAct_Agent实现|ReAct Agent 实现]]
+- [[langgraph/tutorial/多轮对话Agent|多轮对话 Agent]]
+- [[langgraph/tutorial/RAG_Agent|RAG Agent]]
+- [[langgraph/tutorial/测试模式|测试模式]]
+- [[langgraph/tutorial/生产部署清单|生产部署清单]]
 
 ## 模块分类表
 
@@ -202,7 +215,7 @@ builder.add_edge("node_name", END)
 graph = builder.compile(checkpointer=MemorySaver())
 
 # 执行
-result = graph.invoke({"messages": [][[})
+result = graph.invoke({"messages": []})
 ```
 
 ### 常用导入

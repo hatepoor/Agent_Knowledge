@@ -523,7 +523,7 @@ llm_with_tools = llm.bind_tools(tools)
 def smart_agent(state: RAGState) -> dict:
     """智能 Agent：自主选择检索策略"""
     response = llm_with_tools.invoke(state["messages"])
-    return {"messages": [response][[}
+    return {"messages": [response]}
 ```
 
 ## 相关页面

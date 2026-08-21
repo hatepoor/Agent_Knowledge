@@ -197,7 +197,7 @@ builder.add_edge("farewell", END)
 # 5. 编译并执行
 graph = builder.compile()
 result = graph.invoke({"text": "欢迎使用 LangGraph"})
-print(result["text"][[)  # 输出：你好！欢迎使用 LangGraph 再见！
+print(result["text"])  # 输出：你好！欢迎使用 LangGraph 再见！
 ```
 
 ## 何时使用 LangGraph vs 纯 LangChain

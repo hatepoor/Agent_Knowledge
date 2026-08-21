@@ -207,7 +207,7 @@ conn_string = "postgresql://user:pass@host:5432/db?sslmode=require"
 conn_string = "postgresql://user:pass@host:5432/db?connect_timeout=10"
 
 # Supabase 示例
-conn_string = "postgresql://postgres:[password]@db.[project][[.supabase.co:5432/postgres"
+conn_string = "postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres"
 
 # Neon Serverless 示例
 conn_string = "postgresql://user:pass@host.neon.tech/db?sslmode=require"

@@ -363,7 +363,7 @@ result = app.invoke(
     config=config
 )
 for msg in result["messages"]:
-    print(f"[{msg.type}][[ {msg.content}")
+    print(f"[{msg.type}] {msg.content}")
 
 # 关闭连接
 conn.close()

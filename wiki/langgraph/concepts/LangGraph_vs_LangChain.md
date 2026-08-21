@@ -295,7 +295,7 @@ from langgraph.prebuilt import create_react_agent
 
 agent = create_react_agent(
     model=ChatOpenAI(model="gpt-4o-mini"),
-    tools=[search][[,
+    tools=[search],
 )
 
 # create_react_agent 内部就是：

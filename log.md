@@ -940,3 +940,300 @@
 - **核心指南覆盖**：执行时序图、状态更新机制、5 个实战示例、6 种反模式、生产配置模板
 - **更新**：`index.md`（添加所有新页面）、`log.md`
 - **基于知识库协议**：搜索→核时效（langchain v1.0+ 官方文档）→补充→给代码
+
+## [2026-07-22] ingest | 初始化 FastAPI 知识库专题
+- 触发原因：用户开始学习 FastAPI，要求系统化整理并与 LangChain/Agent 知识结合
+- 资料来源：FastAPI 官方文档 v0.115+（fastapi.tiangolo.com）、社区部署教程
+- 创建文档（共 13 个新页面）：
+  * 核心概念：FastAPI概述、快速入门、路径操作、请求体与Pydantic、参数验证
+  * 进阶机制：依赖注入、中间件与CORS、错误处理与响应模型、安全认证、异步处理
+  * 生产部署：流式响应、部署、与LangChain集成
+- 设计原则：每个文档均关联 LangChain/Agent 内容，体现"FastAPI 是 Agent 的 HTTP 外壳"
+- 更新：index.md（新增 FastAPI 专题章节）、log.md
+
+## [2026-07-27] supplement | 补充正则表达式知识库 + 增强 lambda
+- 创建：`wiki/python/basics/正则表达式.md`
+  - 涵盖：re 模块核心函数、元字符速查表、逐模式拆解 5 个常见场景（邮箱/手机号/中文/URL/IP）
+  - 进阶：分组与捕获、命名分组、sub 函数式替换、贪婪 vs 非贪婪、编译优化
+  - 实战：PIIMiddleware 自定义检测器、3 个常见错误
+- 修改：`wiki/python/functions/函数.md`
+  - 修正 lambda 部分 typo（`[4, 5][[`）
+  - 新增 LangChain 实战示例（RunnablePassthrough.assign）
+- 更新：log.md
+
+## [2026-07-27] supplement | 补充 join 和 f-string 详解到字符串知识库
+- 文件：`wiki/python/basics/字符串.md`
+- 扩充 f-string 节：从 4 行示例扩展为完整教程
+  - 逐部分解释 `{name}` 的求值过程
+  - 新增格式控制（千分位、百分比、对齐、十六进制、日期）
+  - 补充 f-string vs 其他三种方式的对比说明
+- 新增 join 详解节：从表格一行扩展为独立教程
+  - 核心规则："只在相邻元素间插入分隔符"
+  - 与 `+` 的性能对比
+  - 配合生成器表达式的实战示例
+- 修正：`sorted("hello")` 行末多余的 `[[` typo
+- 更新：log.md
+
+## [2026-07-28] supplement | 补充 Skills 渐进式加载的底层消息流转
+- 文件：`wiki/agent/skills/Skills实现与集成.md`
+- 在"渐进式加载详解"中新增"底层消息流转"和"tool docstring 设计原则"两节
+
+## [2026-07-28] ingest | 新建 Docker 沙箱专题
+- 创建目录：`wiki/docker/`（新专题）
+- 创建文档：
+  - `wiki/docker/Docker沙箱与Agent集成.md` — 总览：架构图、三种方案对比、安全配置速查
+  - `wiki/docker/DockerSandboxManager.md` — 完整实现：SandboxConfig/SandboxResult/DockerSandbox 类、@tool 封装、Agent 组装、自定义镜像、目录结构
+- 资料来源：LangChain 官方文档（ShellToolMiddleware + Deep Agents Sandbox Backend）、docker-py 官方 API
+- 核心价值：Agent 与 Docker 沙箱的三种集成方案（内置中间件 / 自定义 tool / 托管平台），每种含完整可运行代码
+- 更新日期：2026-07-28
+
+## [2026-07-28] supplement | Docker 沙箱专题深度生产级重构
+- 触发原因：用户要求深度思考、细化到生产级别，满足知识库文件组织规范
+- 操作：从 2 个文件拆解为 8 个专题页面，删除旧文件
+- 新文件结构：
+  - `wiki/docker/Docker沙箱概述.md` — 架构总览：三层方案对比、选择决策树、生产关注点地图
+  - `wiki/docker/Docker_Sandbox核心类.md` — 核心类逐层拆解：配置类/结果类/管理器类/@tool封装/Agent组装
+  - `wiki/docker/沙箱安全加固.md` — 安全五维度：文件系统隔离/网络隔离/资源限制/内核安全/镜像安全/密钥管理/审计检查清单
+  - `wiki/docker/沙箱性能优化.md` — 性能四维度：镜像优化/预热池/exec_run vs containers.run/并发控制/延迟目标
+  - `wiki/docker/沙箱监控与日志.md` — structlog JSON 日志/Prometheus metrics/Agent层追踪/trace_id全链路
+  - `wiki/docker/沙箱错误处理与容错.md` — 异常分类/指数退避重试/优雅降级/双重超时/Supervisor守护
+  - `wiki/docker/沙箱生产部署清单.md` — 8 维度 checklist（镜像/资源/安全/监控/容错/Skills/依赖/CI/CD）
+  - `wiki/docker/沙箱与Agent集成实践.md` — 完整项目：config.py + manager.py + tools.py + audit中间件 + FastAPI 入口
+- 删除旧文件：Docker沙箱与Agent集成.md、DockerSandboxManager.md
+- 遵循 SCHEMA.md：type=concept、中文文件名（可读）与英文文件名（API类）、frontmatter 含 tags/created/updated/type
+
+## [2026-07-28] supplement | Docker 沙箱补充 3 个生产级文档
+- 触发原因：用户要求内容足够全面指导 Agent 开发
+- 新增文档：
+  - `wiki/docker/沙箱常见使用案例.md` — 3 个端到端场景（数据分析/代码审查/代码生成），每个含 skill 文件 + Agent 配置 + 执行流程 + 配置对比表
+  - `wiki/docker/沙箱调试与故障排查.md` — 8 类常见故障的诊断流程和修复方案（容器启动失败/超时/OOM/代码异常/网络/挂载/daemon/调试技巧）+ 速查表
+  - `wiki/docker/沙箱多租户隔离.md` — 4 维度隔离（网络/资源/文件/日志）、TenantConfig/TenantManager/MultiTenantSandbox 完整实现、4 级配额策略、审计追溯、隔离验证
+- 更新：log.md
+
+## [2026-07-29] ingest | 初始化 DeepAgents 知识库专题
+- 触发原因：用户开始学习 DeepAgents，要求搜索官方文档并系统化整理
+- 资料来源：docs.langchain.com/oss/python/deepagents/、reference.langchain.com/python/deepagents、pypi.org/project/deepagents
+- 创建目录：`wiki/deepagents/`（新专题）
+- 创建文档（共 9 个新页面）：
+  - DeepAgents概述.md — 架构定位、与 create_agent 关系、9 大核心能力
+  - 快速入门.md — 最小 Agent、自定义工具、流式、权限、HITL、沙箱
+  - 中间件栈.md — 13 层默认栈详解、合并规则、覆盖示例
+  - 内置工具.md — write_todos/task/文件系统工具/execute
+  - 文件系统后端.md — 6 种 Backend 选型指南
+  - 子代理系统.md — 通用/自定义/编译/异步子代理
+  - 上下文管理.md — 4 层管理 + Prompt Caching
+  - 自定义与扩展.md — HarnessProfile、权限、消息优化
+  - 与LangChain_Agent对比.md — create_agent vs create_deep_agent + 迁移指南
+- 设计原则：与现有 LangChain/Agent/Middleware/Docker 知识库深度交叉引用，体现代码复用关系
+
+## [2026-07-29] restructure | DeepAgents 重组为子目录 + 新增生产级内容
+- 操作：9个平铺文件重组为 9 子目录，新增 6 个深度文档
+- 新增：production/源码架构.md、生产部署.md、skills/Skills系统.md、middleware/FilesystemMiddleware详解.md、backend/Backend实战配置.md
+- 最终：14 个文件分属 9 子目录
+
+## [2026-07-29] supplement | DeepAgents 细化补充 7 个深度文档
+- 工具层：文件系统工具详解.md（6 个工具完整参数）、Task子代理工具详解.md（调用格式/执行流程/描述质量/限制）
+- 子代理层：子代理配置实战.md（生产级 prompt 设计/多角色协同/CallSphere 迁��数据）
+- 上下文层：自动摘要机制.md（卸载 20k/摘要 85%/Prompt Caching 省 40%实测数据）、长期记忆与AGENTS.md（格式/自动更新/memory vs skills）
+- 定制层：HarnessProfile深度用法.md（6 字段/注册匹配/按模型隐藏工具）、State扩展与DeltaChannel.md（O(N) vs O(N²)/自定义字段读写）
+- 最终：21 个文件分属 9 子目录
+
+## [2026-07-31] supplement | 补充 Pydantic 组件全景图与四层用法速查
+- 文件：`wiki/python/advanced/Pydantic数据验证.md`
+- 新增"组件全景图（Pydantic v2）"：BaseModel/Field/RootModel/验证器/类型系统/序列化/配置/泛型/错误/扩展包完整组件树
+- 新增组件详解：RootModel（非对象 JSON）、SecretStr（密钥脱敏）、TypeAdapter（免继承验证）、pydantic-settings（BaseSettings 配置管理）
+- 新增"Agent 开发中的四层用法速查"：Tool 参数 / 结构化输出 / State 定义 / 配置管理
+- 修复 typo：`Annotated[int, Field(gt=0)][[` → `Annotated[int, Field(gt=0)]`
+- 更新日期：2026-07-31
+
+## [2026-07-31] supplement | 补充 pydantic-settings 详解（BaseSettings + SettingsConfigDict）
+- 文件：`wiki/python/advanced/Pydantic数据验证.md`
+- 扩充 pydantic-settings 小节为完整详解：
+  - BaseSettings vs BaseModel 对比表（取值来源/典型用途/继承关系）
+  - SettingsConfigDict 专属键（env_file/env_prefix/env_nested_delimiter/secrets_dir）
+  - 加载优先级：显式参数 > 环境变量 > .env > 默认值
+  - 实例化数据流向四步图（读 .env → 环境变量 → 默认值 → 类型校验）
+  - Agent 项目典型用法（config.py + .env 完整示例）
+- 更新日期：2026-07-31
+
+## [2026-07-31] new | 新建 functools 函数工具独立页面
+- 文件：`wiki/python/advanced/functools函数工具.md`
+- 触发原因：用户问 `from functools import lru_cache` 的含义，发现知识库仅零散提及无专页
+- 内容：
+  - 成员一览表：lru_cache/cache/partial/wraps/reduce/cached_property/singledispatch
+  - lru_cache 详解：fib 缓存性能对比（2986 万次→36 次）、执行流程数据流向图、maxsize/typed 参数、4 个注意点、Agent 缓存 LLM 实例实战
+  - partial 偏函数、wraps 元信息保留、reduce 归约、cached_property 属性缓存
+  - 相关页面：装饰器进阶/函数/Pydantic数据验证/fastapi依赖注入
+- 更新日期：2026-07-31
+
+## [2026-07-31] supplement | 补充 assert 断言语句小节
+- 文件：`wiki/python/basics/异常处理.md`
+- 在"抛出异常"之后新增"assert 断言语句"小节：
+  - 语法拆解（带/不带提示信息两种写法）
+  - 执行流程图（条件为 True 空操作 / False 抛 AssertionError）
+  - 与 if+raise 的等价写法
+  - 三个典型场景（前置条件/后置条件/不可能分支）
+  - ⚠️ 关键坑：`python -O` 优化模式下 assert 被删除不执行，与 raise 对比表
+  - 使用注意点（惰性求值误解、不做安全检查）
+  - Agent 项目实战（外部输入用 raise，内部配置用 assert）
+- 修复 typo：`config["db"]["password"][[` → `config["db"]["password"]`
+- 更新日期：2026-07-31
+
+## [2026-07-31] supplement | 补充 Any 任意类型小节
+- 文件：`wiki/python/advanced/类型提示进阶.md`
+- 在"高级类型"章节（TypeAlias 之后）新增 "Any（任意类型）" 小节：
+  - Any 定义：万能通配符，跳过类型检查
+  - 三个典型场景：JSON 外部数据 / 通用工具函数 / **kwargs
+  - Any vs object vs 不写类型提示 对比表（含 `x + 1` 报错示例）
+  - 使用纪律：过度使用 Any 等于放弃类型安全
+  - Agent 框架典型位置：Runnable 通用接口、中间件钩子 state/runtime
+- 修复 typo：`outputs: Dict[str, Any][[,` → `outputs: Dict[str, Any],`
+- 更新日期：2026-07-31
+
+## [2026-07-31] new | 新建 SQLAlchemy 与 SQLModel 数据库引擎页面
+- 文件：`wiki/python/advanced/SQLAlchemy与SQLModel数据库引擎.md`
+- 触发原因：用户给出 create_db_engine 工厂代码要求解释，知识库无 SQLAlchemy 专页
+- 内容（每个参数详解）：
+  - 完整代码 + 三件事总览（创建引擎/内存库 StaticPool/事件开外键）
+  - 导入详解表：Any/event/Engine/create_engine/StaticPool 各自作用
+  - database_url 连接串格式（sqlite 内存/磁盘、postgresql、mysql）
+  - 函数参数：database_url / `*` 仅限关键字 / echo 打印 SQL
+  - create_engine 参数：connect_args check_same_thread 线程限制、poolclass StaticPool 内存库原理（含 :memory: 连接隔离说明、poolclass 对比表）
+  - event.listen：事件名表（connect/checkout/begin...）、回调签名 2 参数、SQLite 外键默认不生效的原因
+  - 数据流向总览图 + FastAPI Session 依赖注入调用示例
+- 更新日期：2026-07-31
+
+## [2026-07-31] ingest | 创建 SQLModel 学习模块（6 页面）
+- 依据：knowledge-base-builder 技能 + SCHEMA.md 规范，用户要系统学习 SQLModel
+- 新建 `wiki/sqlmodel/` 模块（每页含 frontmatter/一句话定义/对比表格/交叉引用）：
+  - `概述.md` — 模块导航：SQLModel 定位（一个类=SQLAlchemy模型+Pydantic模型）、解决的双类维护问题、学习路径
+  - `模型定义.md` — table=True 表模型 vs 纯校验模型、Field 全参数表（列属性+校验双层）、类型映射、create_all、双重身份、常见误区
+  - `CRUD操作.md` — 四步流程（add/commit/refresh）数据流向图、first/one/all 对比、变更跟踪、删除、完整示例、误区
+  - `查询进阶.md` — where 逻辑运算、操作符表（in_/like/is_/between）、排序/分页/聚合/JOIN 隐式+显式
+  - `关系与关联.md` — 一对多（foreign_key+Relationship+back_populates）、多对多 Link 模型、cascade_delete、N+1 解决
+  - `引擎与Session.md` — 迁移自 `python/advanced/SQLAlchemy与SQLModel数据库引擎.md` 并扩充 Session 章节（生命周期/方法速查/FastAPI 注入）
+- 迁移动作：删除旧文件 `wiki/python/advanced/SQLAlchemy与SQLModel数据库引擎.md`，5 个页面旧链接批量更新为 `[[sqlmodel/引擎与Session|SQLAlchemy]]`
+- 资料时效：基于 sqlmodel.tiangolo.com 官方教程 2026 最新版
+- 更新日期：2026-07-31
+
+## [2026-07-31] new | 新建 pytest 与 fixture 页面
+- 文件：`wiki/python/testing/pytest与fixture.md`（新建 testing 目录，便于后续扩展 pytest 系列）
+- 触发原因：用户问 `@pytest.fixture` 注解作用，知识库无 pytest 专页
+- 内容：
+  - fixture 解决的问题（重复准备/清理痛点）
+  - 基本用法 + 执行流程数据流向图（yield 前后 = 准备/清理）
+  - scope 生命周期表（function/module/session/class）
+  - fixture 依赖链（参数名自动解析）
+  - 内置 fixture（tmp_path/capsys/monkeypatch/request）
+  - 4 个常见误区 + 与 SQLModel 结合实战
+- 交叉引用：sqlmodel/引擎与Session、fastapi/测试、langgraph 测试模式
+- 更新日期：2026-07-31
+
+## [2026-07-31] new | 新建 SimpleNamespace 轻量对象页面
+- 文件：`wiki/python/advanced/SimpleNamespace轻量对象.md`
+- 触发原因：用户问 `from types import SimpleNamespace` 的作用，知识库无相关内容
+- 内容：
+  - 定位：免定义、属性可随意增删改的轻量对象（object 的升级版）
+  - 三种创建方式（含 `SimpleNamespace(**dict)` 字典转对象）
+  - 与 dict 对比表（访问语法/非法键/遍历/自动补全）+ 选择规则
+  - 4 个典型场景：测试桩、模拟数据库行、配置读取、函数多值打包
+  - 与 dataclass/namedtuple 对比表
+  - 小细节：repr/vars 互转/相等性
+- 更新日期：2026-07-31
+
+## [2026-08-01] new | 新建 create_deep_agent 参数详解页
+- 文件：`wiki/deepagents/customization/create_deep_agent参数详解.md`
+- 触发原因：用户问 "create_deep_agent 中有哪些参数"
+- 资料时效：官方 docs.langchain.com customization 页 + API reference（deepagents>=0.7）
+- 内容（18 参数完整清单）：
+  - 完整签名 + 参数速查总表（基本配置/四能力/持久化安全/高级定制/辅助 五组）
+  - 基本配置：model（字符串 vs 实例）、tools（@tool/函数/MCP）、system_prompt
+  - 四能力：subagents、skills、memory（含 skills vs memory 对比表）、backend（6 种后端表）
+  - 持久化安全：checkpointer（HITL 必需）、store、permissions、interrupt_on
+  - 高级定制：response_format、state_schema、context_schema、middleware
+  - 易错点汇总：interrupt_on 必须配 checkpointer、StateBackend 路径 / 前缀、覆盖中间件需完整配置
+- 更新日期：2026-08-01
+
+## [2026-08-01] supplement | 补充 AGENTS.md vs system_prompt 对比章节
+- 文件：`wiki/deepagents/context/长期记忆与AGENTS.md`
+- 触发原因：用户问 "AGENTS.md 存的都是什么东西？和系统提示词有什么区别？"
+- 新增"AGENTS.md vs system_prompt"章节（5.1-5.6）：
+  - 一句话区别 + 执行流程对比图（代码注入 vs 文件注入）
+  - 七维对比表（本质/注入时机/谁定义/可变性/作用范围/更新频率/典型内容）
+  - 核心差异：system_prompt 是"死"的，AGENTS.md 是"活"的（Agent 可 write_file 自更新）+ 自进化流程图
+  - 生产三层 prompt 体系：system_prompt（人设）/ AGENTS.md（记忆）/ SKILL.md（技能）
+  - 生产实践建议表（token 控制/大小/只读/多级文件）
+- 修复损坏链接：`[[deepagents/middleware/中���件栈概述]]` → `[[deepagents/middleware/中间件栈概述]]`
+- 更新日期：2026-08-01
+
+## [2026-08-04] fix | 修正后端概述页（官方 6 种后端定义）
+- 文件：`wiki/deepagents/backend/后端概述.md`
+- 修正内容：
+  - 按官方文档（deepagents>=0.7）修正"6 种内置后端"定义：State / Filesystem / **LocalShell** / Store / ContextHub / Composite，补上缺失的 `LocalShellBackend`
+  - 明确 Sandbox 是**独立的沙箱后端类别**（6 个提供商：LangSmith/Daytona/E2B/Modal/Runloop/Vercel），不再与内置后端并列
+  - 新增"官方 2026 版补充要点"：StateBackend 线程内跨轮持久、FilesystemBackend virtual_mode、LocalShellBackend 最高风险、StoreBackend namespace 隔离、ContextHubBackend 云端仓库
+  - 新增 LocalShellBackend 专章（含 execute 风险警告、与 Docker 沙箱的关系）
+  - 更新选择决策树（按"是否需要执行代码"分流）、修复旧链接（内置工具/中间件栈 → 新子目录路径）
+- 资料时效：docs.langchain.com 官方文档 2026-08 最新版
+- 更新日期：2026-08-04
+
+## [2026-08-06] fix | DeepAgents 专题全面修复（断链/版本/矛盾/重复/关联）
+- 触发原因：用户反馈 DeepAgents 内容粗略、组件关联性不足；诊断发现 5 类问题
+- **P0-1 断链修复**：批量修复 23 条断链（8 个文件），旧路径→新路径映射 9 组
+  - `deepagents/中间件栈` → `middleware/中间件栈概述`（6 处）等
+  - 修复后验证：deepagents 目录内 0 条断链
+- **P0-2 代码错误修复**：
+  - `快速入门.md`：stream_events 括号不匹配（缺 `}` 闭合）
+  - `生产部署.md`：补 `import json`、定义未声明的 `internet_search`/`custom_tool`/`send_email` 工具、移除僵尸 import、修正 `StoreBackend(store=store)` → `StoreBackend()`
+- **P1-1 版本统一**：20 个文件 `>=0.5`/`>=0.6` → `>=0.7`（共 29 页全部统一）
+  - `源码架构.md` 目录树更新为 v0.6.12 monorepo 结构（libs/deepagents、context_hub.py、local_shell.py、todo_list.py、harness_profiles.py）
+- **P1-2 矛盾数据统一**：
+  - 与LangChain_Agent对比.md："默认中间件 10 个" → "13 层"
+  - 中间件栈概述.md：文件工具 7 个（含 delete）→ 6 个（与内置工具概述一致）
+  - 子代理概述.md：`tools=[read_file]` 补充来源说明（FilesystemMiddleware 提供）
+- **P2 关联强化 + 去重**：
+  - 新建 `overview/组件依赖全景.md`：参数→中间件→工具→backend 完整映射表、read_file 5 消费者链、execute 来源、存储三通道、端到端数据流
+  - 概述页导航加入组件依赖全景
+  - 消除 Summarization 重复配置：上下文管理概述改为"详见自动摘要机制"，中间件栈概述示例加权威引用
+- 资料时效：deepwiki/github 源码核对（v0.6.12+）
+- 更新日期：2026-08-06
+
+## [2026-08-21] supplement | 补充 LangGraph 内置 Reducer 完整清单
+- 文件：`wiki/langgraph/modules/langgraph_state/Reducer.md`
+- 触发原因：用户问"langgraph 中自带的常用的 reducer 函数有哪些"，发现原页面只覆盖 add_messages + 自定义，缺 3 个官方内置机制
+- 新增内容：
+  - `operator.add`：数值累加 / 列表拼接，vs add_messages 对比表（纯拼接 vs 按 ID 更新）
+  - `RemoveMessage` + `REMOVE_ALL_MESSAGES`：按 ID 删除消息（配 add_messages 使用）、清空全部、典型应用
+  - `Overwrite`：绕过 reducer 强制覆盖（重置累加字段）
+  - 内置 reducer 速查总表（5 项：add_messages/operator.add/RemoveMessage/Overwrite/默认覆盖）
+  - 补充 MessagesState 预置状态类说明
+- 修复 2 处 typo：`"tags": ["initial"][[,` → `["initial"]`；`result["step_count"][[)` → `result["step_count"])`
+- 更新 frontmatter（tags 补充、updated 2026-08-21）
+- 资料时效：官方 docs.langchain.com/graph-api + reference 2026-08 核实
+- 更新日期：2026-08-21
+
+## [2026-08-22] supplement | 新增 LangGraph 并行执行模型页面（含 mermaid 图）
+- 新建：`wiki/langgraph/modules/langgraph_core/并行执行模型.md`
+- 触发原因：用户问"节点2/3 是同时执行吗？异步还是先后顺序"，发现知识库只有零散提及（超级步骤定义/Command 并行语法），缺执行细节
+- 页面内容：
+  - 超级步骤核心概念（Pregel 模型）+ mermaid 图（超级步骤划分 + 屏障时序 + checkpoint 粒度）
+  - 同一超级步骤三特性：共享输入快照、屏障同步、输出统一合并
+  - 关键问题：invoke() 同步 = 顺序执行（逻辑并行）/ ainvoke() 异步 = 真并发，对比表 + 耗时示例
+  - 选型建议（CPU 用 invoke、I/O 用 ainvoke、FastAPI 必须 ainvoke）
+  - 与 Checkpointer 关系：快照按超级步骤存（非按节点）
+- 关联更新：
+  - `Command与状态更新.md` 3.2 并行章节加"详见并行执行模型"引用
+  - `错误处理与恢复.md` 4.3 超级步骤章节加引用
+- 更新日期：2026-08-22
+
+## [2026-08-22] organize | LangGraph 知识库整体整理（完善 + 示范案例）
+- 触发原因：用户要求"整理 langgraph 知识库，首先完善，其次有示范案例（不用很长）"
+- **P1 完善**：
+  - 修复 63 处 `[[` 残留 typo（38 个文件）——此前批量替换遗留的代码损坏，用正则 lookbehind 定位并修复，验证清零
+  - 导航页 `LangGraph模块详解.md` 补全：目录树加并行执行模型.md；子页面链接补错误处理与恢复/Command与状态更新/可视化与调试/并行执行模型；新增 tutorial 分区
+  - 并行执行模型.md 补"简短可运行示例"（A→B、C→D 并行分支 + invoke/ainvoke 计时对比）
+- **P2 示范案例**：
+  - 新建 `tutorial/综合示例_全概念演示.md`：一个文件（订单处理工作流）串起全部核心概念（State/Node/Edge/条件边/Checkpointer/Streaming/会话隔离），无 LLM 依赖可直接运行，附运行结果预览 + 概念映射表
+  - 挂入导航页 tutorial 分区（⭐ 标注）
+- 验证：断链 0、typo 0，文件总数 40 → 41
+- 更新日期：2026-08-22

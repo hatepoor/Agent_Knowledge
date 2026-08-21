@@ -260,7 +260,7 @@ async def simulate_users():
     results = await asyncio.gather(
         user_chat("user-alice", ["你好", "我叫Alice"]),
         user_chat("user-bob", ["你好", "我叫Bob"]),
-        user_chat("user-charlie", ["你好", "我叫Charlie"][[),
+        user_chat("user-charlie", ["你好", "我叫Charlie"]),
     )
 
     # 验证隔离性
@@ -452,7 +452,7 @@ def create_thread_id(user_id: str, session_type: str = "chat") -> str:
     示例: user-123:chat:20260711:a1b2c3d4
     """
     timestamp = datetime.now().strftime("%Y%m%d")
-    short_id = uuid.uuid4().hex[:8][[
+    short_id = uuid.uuid4().hex[:8]
     return f"{user_id}:{session_type}:{timestamp}:{short_id}"
 ```
 

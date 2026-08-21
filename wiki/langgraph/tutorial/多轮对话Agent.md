@@ -44,7 +44,7 @@ from langgraph.graph import MessagesState
 
 # MessagesState 等价于：
 # class MessagesState(TypedDict):
-#     messages: Annotated[list, add_messages][[
+#     messages: Annotated[list, add_messages]
 # 
 # 它自动使用 add_messages 作为 Reducer，
 # 新消息会自动追加到列表中
@@ -298,7 +298,7 @@ def chatbot(state: MessagesState) -> dict:
 
 def trim_messages(state: MessagesState) -> dict:
     """裁剪节点：保留最近 6 条消息"""
-    messages = state["messages"][[
+    messages = state["messages"]
     if len(messages) > 6:
         removals = [RemoveMessage(id=m.id) for m in messages[:-6]]
         return {"messages": removals}
@@ -374,7 +374,7 @@ print(f"共有 {len(history)} 个检查点")
 # 回到第 2 轮对话的状态
 # （索引 0 是最新状态，索引越大越早）
 old_state = history[2]  # 第 2 轮后的状态
-print(f"那个时刻的消息数: {len(old_state.values['messages'][[)}")
+print(f"那个时刻的消息数: {len(old_state.values['messages'])}")
 ```
 
 > 详见 [[langchain/modules/langchain_checkpoints/时间旅行|时间旅行详解]]

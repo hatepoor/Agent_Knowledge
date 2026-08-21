@@ -9,12 +9,118 @@ type: concept
 
 ## 后端对比
 
-| 后端 | 存储位置 | 内存占用 | 持久化 | 适用场景 |
-|------|---------|---------|--------|----------|
-| InMemorySaver | 进程内存 | 低 | 否 | 开发测试 |
-| PostgresSaver | PostgreSQL | 数据库管理 | 是 | 生产部署 |
-| SqliteSaver | SQLite 文件 | 文件系统 | 是 | 单机持久化 |
-| AzureCosmosDBSaver | Azure Cosmos DB | 云托管 | 是 | Azure 云 |
+| 后端                 | 存储位置            | 内存占用  | 持久化 | 适用场景    |
+| ------------------ | --------------- | ----- | --- | ------- |
+| InMemorySaver      | 进程内存            | 低     | 否   | 开发测试    |
+| PostgresSaver      | PostgreSQL      | 数据库管理 | 是   | 生产部署    |
+| SqliteSaver        | SQLite 文件       | 文件系统  | 是   | 单机持久化   |
+| AzureCosmosDBSaver | Azure Cosmos DB | 云托管   | 是   | Azure 云 |
+
+## AsyncPostgresSaver（异步版，生产推荐）
+
+`AsyncPostgresSaver` 是 `PostgresSaver` 的异步版本，基于 `asyncpg` 驱动，适合 FastAPI / asyncio 项目。
+
+### 导入与安装
+
+```bash
+pip install langgraph-checkpoint-postgres
+```
+
+```python
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+```
+
+### 基本用法
+
+```python
+import asyncio
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from langchain.agents import create_agent
+
+async def main():
+    # 方式1：from_conn_string（简单，自动管理连接）
+    async with AsyncPostgresSaver.from_conn_string(
+        "postgresql://user:password@localhost:5432/agent_db"
+    ) as checkpointer:
+        
+        # 首次运行：创建表结构
+        await checkpointer.setup()
+        
+        # 创建 Agent
+        agent = create_agent("openai:gpt-4o", tools=tools, checkpointer=checkpointer)
+        
+        # 对话（状态自动存入 PostgreSQL）
+        result = await agent.ainvoke(
+            {"messages": [{"role": "user", "content": "你好"}]},
+            config={"configurable": {"thread_id": "user_001"}},
+        )
+        print(result["messages"][-1].content)
+
+asyncio.run(main())
+```
+
+### 在 FastAPI 中使用（lifespan 管理生命周期）
+
+```python
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+import os
+
+checkpointer: AsyncPostgresSaver | None = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global checkpointer
+    # 启动时：连接数据库
+    checkpointer = AsyncPostgresSaver.from_conn_string(os.environ["DATABASE_URL"])
+    await checkpointer.__aenter__()
+    await checkpointer.setup()  # 确保表存在
+    print("[启动] PostgreSQL checkpointer 已连接")
+    yield
+    # 关闭时：断开连接
+    await checkpointer.__aexit__(None, None, None)
+    print("[关闭] PostgreSQL checkpointer 已断开")
+
+app = FastAPI(lifespan=lifespan)
+
+@app.post("/chat")
+async def chat(message: str, thread_id: str = "default"):
+    agent = create_agent("openai:gpt-4o", tools=tools, checkpointer=checkpointer)
+    result = await agent.ainvoke(
+        {"messages": [{"role": "user", "content": message}]},
+        config={"configurable": {"thread_id": thread_id}},
+    )
+    return {"reply": result["messages"][-1].content}
+```
+
+### 同步版 vs 异步版
+
+| 维度 | PostgresSaver（同步） | AsyncPostgresSaver（异步） |
+|------|---------------------|--------------------------|
+| 导入路径 | `langgraph.checkpoint.postgres` | `langgraph.checkpoint.postgres.aio` |
+| 底层驱动 | `psycopg`（同步） | `asyncpg`（异步） |
+| 调用方式 | `agent.invoke()` | `await agent.ainvoke()` |
+| 适用框架 | Flask、脚本、同步项目 | FastAPI、asyncio 项目 |
+| 并发能力 | 单线程阻塞 | 多请求并发不阻塞 |
+| 生产推荐 | 同步场景 | **异步场景（主流）** |
+
+### 连接池（高并发）
+
+```python
+# 高并发场景：使用连接池而不是单连接
+import asyncpg
+
+async def create_pooled_checkpointer():
+    pool = await asyncpg.create_pool(
+        dsn=os.environ["DATABASE_URL"],
+        min_size=5,    # 最少 5 个连接
+        max_size=20,   # 最多 20 个连接
+    )
+    checkpointer = AsyncPostgresSaver(pool)
+    await checkpointer.setup()
+    return checkpointer
+```
 
 ## 为什么数据库存储不会导致进程 OOM
 

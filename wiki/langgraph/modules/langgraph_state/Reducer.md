@@ -1,8 +1,8 @@
 ---
-tags: [langgraph, state, reducer, 归约函数, add_messages]
+tags: [langgraph, state, reducer, 归约函数, add_messages, operator.add, RemoveMessage, Overwrite]
 type: concept
 created: 2026-07-11
-updated: 2026-07-11
+updated: 2026-08-21
 ---
 
 # Reducer 归约函数
@@ -108,6 +108,130 @@ result = add_messages(existing, update)
 #     AIMessage(content="新回答（已修正）", id="msg-2"),  # 被替换了
 # ]
 ```
+
+---
+
+## 其他内置 Reducer
+
+除 `add_messages` 外，LangGraph 还提供 3 个常用内置机制：`operator.add`（通用累加）、`RemoveMessage`（删除消息）、`Overwrite`（强制覆盖）。加上默认的覆盖行为，构成完整的 reducer 工具集。
+
+### 1. operator.add — 通用累加（数值 / 列表）
+
+来自 Python 标准库 `operator`，不需要 LangGraph 额外实现——任何 `(left, right) -> left + right` 的二元函数都能当 reducer，`operator.add` 是最标准的那个。
+
+```python
+from operator import add
+from typing import TypedDict, Annotated
+
+class AccumulateState(TypedDict):
+    total_score: Annotated[int, add]        # 数值累加：每次返回的分数累加
+    results: Annotated[list[str], add]      # 列表拼接：收集多个节点的结果
+    name: str                                # 默认覆盖
+
+def node_a(state: AccumulateState) -> dict:
+    return {"total_score": 5, "results": ["节点A的结果"]}
+
+def node_b(state: AccumulateState) -> dict:
+    return {"total_score": 3, "results": ["节点B的结果"]}
+
+# 初始 {"total_score": 0, "results": ["初始"]}
+# 运行后 → {"total_score": 8, "results": ["初始", "节点A的结果", "节点B的结果"]}
+```
+
+**vs `add_messages` 的区别**：
+
+| 维度 | `operator.add` | `add_messages` |
+|------|---------------|----------------|
+| 列表行为 | 纯拼接 | 追加 + 按 ID 更新 + 反序列化 |
+| 能更新已有元素 | ❌ | ✅（同 ID 替换） |
+| 能删除元素 | ❌ | ✅（配 RemoveMessage） |
+| 适用 | 数值计数、非消息列表收集 | 消息历史 |
+
+> ⚠️ 处理**消息列表必须用 `add_messages`**：若用 `operator.add`，HITL 人工修改消息、按 ID 去重等能力全部失效。
+
+---
+
+### 2. RemoveMessage — 删除消息（配 add_messages 使用）
+
+LangGraph 中删除消息的专用机制。`RemoveMessage` 是一个特殊消息对象，放进节点返回的 `messages` 字段，`add_messages` reducer 识别后**按 ID 删除**对应消息。
+
+```python
+from langchain_core.messages import RemoveMessage
+
+def delete_old_messages(state):
+    """消息超过 6 条时，删除最早的 6 条"""
+    messages = state["messages"]
+    if len(messages) > 6:
+        # 取出最早 6 条消息的 ID，包装成 RemoveMessage 返回
+        return {"messages": [RemoveMessage(id=m.id) for m in messages[:6]]}
+    return {"messages": []}
+```
+
+**清空全部消息**——使用 `REMOVE_ALL_MESSAGES` 常量：
+
+```python
+from langgraph.graph.message import REMOVE_ALL_MESSAGES
+
+def clear_all(state):
+    """一键清空对话历史"""
+    return {"messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES)]}
+```
+
+**关键前提**：
+- `RemoveMessage` 只能作用于**使用 `add_messages` reducer 的消息字段**（普通列表字段无法删除）
+- 删除必须通过**节点返回**实现——单独调用方法不会生效
+- 删除后消息不可恢复，需确保剩余对话仍然语义完整
+
+**典型应用**：
+- 长对话裁剪（保留最近 N 条）
+- HITL 中删除被拒绝的 AI 回复
+- 清除敏感/过期消息
+
+---
+
+### 3. Overwrite — 强制覆盖（绕过 reducer）
+
+当字段配置了 reducer（如 `operator.add` 累加），但某次更新**不想累加、要整体重置**时，用 `Overwrite` 包裹新值，告诉 LangGraph"这次绕过 reducer，直接覆盖"。
+
+```python
+from langgraph.types import Overwrite
+
+def reset_messages(state):
+    """重置消息列表（绕过 add_messages 的追加逻辑）"""
+    return {"messages": Overwrite(["fresh start"])}
+
+def reset_total(state):
+    """重置计数器（绕过 operator.add 的累加逻辑）"""
+    return {"total_score": Overwrite(0)}
+```
+
+**行为对比**：
+
+```python
+# 无 Overwrite：走 reducer
+return {"total_score": 3}
+# → total_score 累加：旧值 + 3
+
+# 有 Overwrite：绕过 reducer
+return {"total_score": Overwrite(0)}
+# → total_score 直接变为 0，忽略旧值
+```
+
+**适用场景**：累计类字段的"清零/重置"操作——比如一轮任务结束后重置计数器、清空临时收集的结果列表。
+
+---
+
+### 4. 内置 reducer 速查总表
+
+| Reducer | 导入来源 | 作用 | 适用字段 |
+|---------|---------|------|---------|
+| `add_messages` | `langgraph.graph.message` | 追加 + 按 ID 更新 + 反序列化 + 可删除 | 消息历史 |
+| `operator.add` | `operator` | 数值累加 / 列表拼接 | 计数、结果收集 |
+| `RemoveMessage` | `langchain_core.messages` | 按 ID 删除消息（配 add_messages） | 消息历史 |
+| `Overwrite` | `langgraph.types` | 绕过 reducer 强制覆盖 | 任何配了 reducer 的字段 |
+| （默认）无 | — | 新值替换旧值 | 标量字段 |
+
+> 补充：`MessagesState` 是预置状态类（`langgraph.graph` 导入），内置 `messages` 字段 + `add_messages` reducer，聊天 Agent 可直接继承它扩展。
 
 ---
 
@@ -340,7 +464,7 @@ app = graph.compile()
 # ===== 运行 =====
 result = app.invoke({
     "messages": [],
-    "tags": ["initial"][[,
+    "tags": ["initial"],
     "query": "初始查询",
     "step_count": 0,
 })
@@ -354,7 +478,7 @@ print("标签:", result["tags"])
 print("查询:", result["query"])
 # → "更新后的查询"  （覆盖）
 
-print("步骤数:", result["step_count"][[)
+print("步骤数:", result["step_count"])
 # → 1  （覆盖，不是累加）
 ```
 

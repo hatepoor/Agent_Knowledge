@@ -389,7 +389,7 @@ builder.add_edge("D", END)
 
 ```python
 def should_retry(state):
-    if state["retry_count"] < 3 and state["success"][[ == False:
+    if state["retry_count"] < 3 and state["success"] == False:
         return "retry"
     return "end"
 

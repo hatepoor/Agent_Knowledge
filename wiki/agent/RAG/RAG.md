@@ -77,6 +77,7 @@ RAG 擅长找到"相关片段"，但不擅长"整合理解"。它不能跨文档
 - [[agent/RAG/RAG混合检索与重排序]] — BM25+向量混合检索、RRF 分数融合、Cross-Encoder 重排序
 - [[agent/RAG/RAG评估与优化]] — RAGAS 评估框架与持续优化策略
 - [[agent/RAG/RAG生产部署]] — 缓存策略、监控告警、成本控制、扩展性设计、安全性
+- [[agent/RAG/多模态RAG]] — 多模态 Embedding、图文混合入库、检索结果多模态组装
 
 ## 来源
 - [[meta/LLM_Wiki_方法论]] — 原文："Most people's experience with LLMs and documents looks like RAG"

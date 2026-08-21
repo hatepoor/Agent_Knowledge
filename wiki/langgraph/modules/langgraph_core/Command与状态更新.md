@@ -203,6 +203,8 @@ def parallel_router(state: State) -> Command:
     return Command(goto=tasks)
 ```
 
+> **执行细节**：这里的"并行"是图语义层面的并行——被路由到的节点构成同一个超级步骤。物理上是否真并发取决于运行方式（`invoke()` 同步顺序执行 / `ainvoke()` 异步真并发），详见 [[langgraph/modules/langgraph_core/并行执行模型]]。
+
 ### 3.3 Command 路由 vs 条件边
 
 ```python
@@ -758,7 +760,7 @@ def my_node(state: State) -> Command:
 |-------------|------|----------|
 | `Command(update={...})` | 更新状态 | 等价于字典返回 |
 | `Command(goto="node")` | 路由到指定节点 | 替代条件边 |
-| `Command(goto=[...][[)` | 路由到多个节点 | 动态并行执行 |
+| `Command(goto=[...])` | 路由到多个节点 | 动态并行执行 |
 | `Command(resume=value)` | 恢复中断执行 | 人工审核工作流 |
 | `Command(update, goto)` | 更新 + 路由 | 分类后路由 |
 

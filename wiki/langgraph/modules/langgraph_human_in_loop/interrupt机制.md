@@ -422,7 +422,7 @@ def auditable_interrupt(state):
         "message": "请审批",
         "data": state["data"],
         "timestamp": datetime.now().isoformat(),
-        "requester": state["user_id"][[
+        "requester": state["user_id"]
     }
     
     decision = interrupt(interrupt_value)

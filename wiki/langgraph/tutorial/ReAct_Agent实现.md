@@ -57,7 +57,7 @@ from langgraph.graph.message import add_messages
 
 class AgentState(TypedDict):
     # 消息列表，使用 add_messages reducer 自动追加新消息
-    messages: Annotated[list, add_messages][[
+    messages: Annotated[list, add_messages]
 ```
 
 > **为什么用 `add_messages`？** 默认的状态更新是覆盖模式，但消息列表需要的是追加模式。`add_messages` 这个 Reducer 会自动将新消息追加到列表中，并处理去重。详见 [[langgraph/modules/langgraph_state/Reducer|Reducer 归约函数]]。
@@ -134,7 +134,7 @@ def manual_tool_node(state: AgentState) -> dict:
     tool_calls = last_message.tool_calls
     
     # 执行每个工具调用
-    results = [][[
+    results = []
     for tool_call in tool_calls:
         # 找到对应的工具
         tool_map = {t.name: t for t in tools}
@@ -448,7 +448,7 @@ app = workflow.compile()
 
 # 或者在 invoke 时设置
 result = app.invoke(
-    {"messages": [HumanMessage(content="...")][[},
+    {"messages": [HumanMessage(content="...")]},
     config={"recursion_limit": 10}  # 最多 10 次循环
 )
 ```

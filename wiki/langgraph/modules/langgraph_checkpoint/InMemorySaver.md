@@ -240,7 +240,7 @@ def test_isolated_conversations():
 
     # 验证隔离：对话A看不到对话B的消息
     state_a = app.get_state(config_a)
-    assert len(state_a.values["messages"][[) == 2  # 只有A的消息
+    assert len(state_a.values["messages"]) == 2  # 只有A的消息
 ```
 
 ### Fixture 复用
