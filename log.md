@@ -1237,3 +1237,23 @@
   - 挂入导航页 tutorial 分区（⭐ 标注）
 - 验证：断链 0、typo 0，文件总数 40 → 41
 - 更新日期：2026-08-22
+
+## [2026-08-24] fix | 多智能体专题更新（API 升级 + 链接修复）
+- 触发原因：用户问"langgraph 中怎么设计多智能体"，诊断发现 4 个页面 API 过时 + 概述页链接损坏
+- **概述.md**：
+  - 修复 3 处损坏链接（`详细文档：langgraph/...|模式]]` → `[[langgraph/...|模式]]`）
+  - 修复 2 处 `add_messages` 未导入（NameError）
+- **主管模式.md**：
+  - `create_react_agent(llm, tools, state_modifier=...)` → 新版 `create_agent(model, tools, system_prompt=..., name=...)`，注明 name 是 Supervisor 分发依据
+  - 修复最佳实践虚构参数 `create_agent(role=...)` → `system_prompt` 承载角色
+  - 新增"官方快捷方式：langgraph-supervisor 包"章节（create_supervisor vs 手写对比表）
+  - 新增"生产踩坑"章节（6 个真实问题：无限循环/输出不被理解/并行覆盖/路由 key 不匹配/断点/审批）
+- **网络模式.md**：
+  - 批量替换 11 处 `create_react_agent` → `create_agent`，`state_modifier` → `system_prompt`
+  - 修复 4 处 `add_messages` 未导入
+  - 新增"官方推荐：Command 显式交接"小节（Command(goto=...) + handoff 工具解析）
+- **层级模式.md**：修复 3 处 `add_messages` 未导入
+- 4 页 frontmatter updated 统一 → 2026-08-24
+- 验证：断链 0 条
+- 资料时效：官方 docs + 社区 2026-08 核实（create_agent name 参数、langgraph-supervisor 包、Command handoff）
+- 更新日期：2026-08-24
