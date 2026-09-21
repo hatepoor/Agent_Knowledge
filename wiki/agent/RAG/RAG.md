@@ -1,11 +1,41 @@
 ---
 tags: [entity, 技术, LLM, 检索]
 created: 2026-06-20
-updated: 2026-06-20
+updated: 2026-09-10
 type: entity
 ---
 
 # RAG (检索增强生成)
+
+> 📌 **历史遗留页面**：权威内容见 [[rag/00_导览与基础/RAG基础与演进全景]]。对照见 [[agent/RAG/README|RAG 迁移对照表]]。
+
+> **本目录（`wiki/agent/RAG/`）是 Agent 视角的 RAG 精简版**——概念速览、关键模块、参数调优、部署方案。
+> 系统化全流程学习请前往 [[rag/RAG_学习路径导航|wiki/rag/ 14 步流水线]]（数据接入→检索→生成→评估），此处为 Agent 域的概念入口。
+
+## 目录导航
+
+| 页面 | 说明 |
+|------|------|
+| [[agent/RAG/RAG核心概念与演进]] — 三代演进（Naive→Advanced→Modular） |
+| [[agent/RAG/RAG关键模块解析]] — 核心模块拆解 |
+| [[agent/RAG/RAG分块策略进阶]] — 分块策略进阶 |
+| [[agent/RAG/RAG混合检索与重排序]] — 混合检索与重排序 |
+| [[agent/RAG/RAG参数调优手册]] — 参数调优参考 |
+| [[agent/RAG/RAG评估与优化]] — 评估与优化 |
+| [[agent/RAG/RAG生产部署]] — 生产部署方案 |
+| [[agent/RAG/RAG_LangChain完整实现]] — LangChain 端到端代码 |
+| [[agent/RAG/向量数据库]] — 向量数据库概念 |
+| [[agent/RAG/多模态RAG]] — 多模态 RAG |
+| [[agent/RAG/LlamaIndex]] — LlamaIndex 框架 |
+
+## 与 `wiki/rag/` 的分工
+
+| 维度 | `agent/RAG/`（本目录） | `wiki/rag/` |
+|------|------------------------|-------------|
+| 定位 | Agent 视角，概念速览 | 系统学习主线，14 步全流程 |
+| 粒度 | 浓缩版，快速查阅 | 原子化分册，逐环节详解 |
+| 覆盖 | 12 篇 | 37 篇（含数据清洗/查询转换/元数据过滤等独有内容） |
+| 适用 | 已有基础，需快速定位概念 | 从零到一系统学习 RAG |
 
 ## 概述
 

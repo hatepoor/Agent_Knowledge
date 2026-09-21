@@ -167,4 +167,4 @@ def react_loop(state: AgentState) -> dict:
 - [[langchain/middleware/中间件概述]] — 中间件系统
 - [[langchain/memory/短期记忆]] — Checkpointer 核心概念
 - [[langchain/memory/Checkpointer存储后端]] — 数据库存储原理
-- [[agent/planning/ReAct]] — ReAct 推理范式
+- [[agent/patterns/ReAct]] — ReAct 推理范式

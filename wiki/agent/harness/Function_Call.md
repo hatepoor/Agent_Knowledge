@@ -47,6 +47,7 @@ Function Call 是 [[agent/harness/Agent_三层架构]] 中**思考层驱动执�
 ## 相关概念
 - [[agent/harness/Agent_三层架构]] — Function Call 连接思考层和执行层
 - [[agent/memory/Agent_Memory]] — 记忆检索本身也是一种 Function Call
+- [[agent/harness/Agent沙箱与安全隔离]] — 工具调用的安全执行必须在沙箱内进行
 - [[agent/orchestration/LangChain]] — 提供了完善的 Function Call 封装
 - [[agent/orchestration/开发Agent实操指南]] — 原文中"加工具调用能力"的核心机制
 

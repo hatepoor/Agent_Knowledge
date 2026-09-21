@@ -7,6 +7,8 @@ type: entity
 
 # LlamaIndex
 
+> 📌 **历史遗留页面**：框架参考见 [[rag/00_导览与基础/LangChain_RAG端到端实现]]。对照见 [[agent/RAG/README|RAG 迁移对照表]]。
+
 ## 概述
 
 LlamaIndex 是一个专注于**数据连接和知识融合**的 LLM 应用框架。与 LangChain 的通用性不同，LlamaIndex 的核心优势在于将私有数据高效地连接到 LLM，擅长构建 RAG 系统和知识密集型 Agent。

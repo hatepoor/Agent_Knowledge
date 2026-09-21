@@ -405,7 +405,7 @@ type: overview
 - [[agent/RAG/向量数据库]] — 向量存储
 
 ### 高级能力
-- [[agent/planning/ReAct]] — 推理+行动
+- [[agent/patterns/ReAct]] — 推理+行动
 - [[langchain/modules/langchain-mcp/MCP协议概述]] — 模型上下文协议
 - [[agent/skills/Skills]] — 技能机制
 

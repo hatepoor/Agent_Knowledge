@@ -4,6 +4,290 @@
 
 ---
 
+## [2026-09-20] fix | PostgreSQL 入门阶段重新定基线：新增零基础层 + 全库去术语
+
+- 触发原因：用户反馈「pgsql 的内容很多我都看不懂，**一个字段、一个关键字，都默认我会**」「我之前只浅浅地用过 MySQL，对 pgsql 基本一窍不通」
+- 诊断（**先取证再动手**，不凭印象改）：全文 grep + 抽样阅读，确认 5 类缺口
+  - **无「第 00 章」**：全套 67 页没有任何一页解释 SQL 是什么、库/表/行/列、关键字、语句结构、分号、注释、报错怎么读
+  - `3.1` 一开篇即 `Schema` / `search_path` / `CREATE SCHEMA` / `CONSTRAINT` / `REFERENCES`，**全部未定义**；前置知识只写了 2.6
+  - 入门阶段混入**未解释的进阶术语**：`MVCC`、`TOAST`、`tuple`、`xmin`/`xmax`、`varlena`（出现在 1.1 / 2.2 / 4.1 / 4.3 / 6.1）
+  - `3.2` 有一段 **15 行、连 4 张系统目录表**的查询（`conrelid::regclass` / `conkey` / `attnum` / `indkey`），对零基础完全不可读
+  - `00-章节目录` 未说明学习顺序的依赖理由
+- 根因：内容是按「**读过数据库教材的人**」的基线写的，而非「**只浅浅用过 MySQL 的人**」。属定位错误，不是排版问题——因此不做逐页打补丁，而是重新定基线
+
+### 用户确认的三项范围决策
+- **目标深度**：能独立写业务 SQL（不含调优与运维）
+- **处理方式**：新增零基础层 + 重写入门阶段
+- **不做** MySQL 对照
+
+### 新增（7 篇）
+- **第00章 学前准备（5 篇）**：`0.1 数据库与SQL是什么`（库/表/行/列、声明式、客户端与服务端、三条书写规则）、`0.2 一条SQL语句的组成`（关键字/标识符/字面量/运算符、单引号 vs 双引号、标点速查）、`0.3 跑通第一条语句`（Docker→psql→建库建表增删改查全流程 + 卡住时应对表）、`0.4 看懂报错信息`（报错三段结构 + 12 类常见报错逐条排查）、`0.5 学前名词与学习地图`（20+ 名词一句话解释 + 依赖链 + 三个查询入口）
+- **`3.0-表主键与外键`**（概念篇，不讲 SQL）：为什么一张表只能描述一种事物、主键三种做法、外键拦住的孤儿数据、一对一/一对多/多对多与中间表
+- **`术语与关键字手册.md`**（根导航，18 节）：SQL 关键字（按功能 8 类）／标点符号／psql 元命令／PG 专有术语／系统列名／系统目录与视图列名／配置参数／报错用词／命名约定／自查四步法
+
+### 去术语与重写（9 个文件）
+- `1.1`：删除 MySQL 对照表（改为 PG 自身三个特点）；新增「本篇读法」——明确后几节可跳过
+- `2.2`：`varlena`/`TOAST` → 改为不依赖术语的解释
+- `3.1`：前置知识改指向 3.0；新增「本篇怎么读」
+- `3.2`：**移除 15 行系统目录查询**，改为 `\d 表名` 的入门做法 + 注明那条查询属进阶内容；新增「本篇怎么读」（EXCLUDE 可跳过）
+- `4.1`：`xmax` 段先解释「系统列」概念、补判断表、标注「看不懂可跳过」并给出替代做法
+- `4.3`：`MVCC`/`xmax`/`tuple`/`dead tuple`/`WAL` → 全部改写为「追加写」的白话解释（含"为什么这样设计"）；`TRUNCATE` 对比表去术语；批量删除段落去术语
+- `6.1`：ACID 表改为大白话（四列：性质／大白话／PG 怎么做到）；DDL 可回滚段删除 MySQL 对照
+- `README`：新增「**〇、从这里开始**」——含「卡住时查哪里」对照表 + 三阶段难度地图；约定新增「入门阶段不出现未解释的进阶术语」
+- `学习路线图`／`00-章节目录`／中段与进阶入口页：补入门起点、补各阶段阅读门槛提醒
+
+### 自动化校验（三支脚本，全部通过）
+| 校验 | 方法 | 结果 |
+|------|------|------|
+| **断链** | 遍历 md 提取 wikilink，比对目标文件是否存在 | **74 文件 / 560 链接 / 断链 0** |
+| **关键字覆盖** | 提取入门阶段代码块中的大写词，去噪后比对术语手册 | 206 项 → 未收录 9 项（**全部为误报**：`LINE`/`YYYY`/`ABC`/`VIP`/`CN`/`TCP`/`IEEE` 是值与报错文本，`CIDR`/`MAC` 是小写条目的同词）。首轮 51 项中已补录 42 个真关键字 |
+| **函数覆盖** | 提取 `name(` 候选，比对函数手册 | 203 项 → 未收录 3 项（`width_buket` 是 `0.4` 篇**故意写的拼写错误示例**；另 2 个真函数已补录） |
+
+> **方法沉淀**：把「关键字／名词」也做成与「函数」同样的**可自动校验的索引页**,是本轮质量提升的关键。「有没有用了没讲的东西」从人工抽样变成了全量核查。
+
+### 篇数与索引
+- 全库篇数：**根导航 5 + 入门 27 + 中段 22 + 进阶 20 = 74 个文件**
+- `index.md`：导航 4→5 页、入门 21→27 页，新增第00章 5 条与 3.0 条目；1.1 摘要去掉 MySQL 表述
+
+### 尚未完成（下一轮）
+- 第 02 / 04 / 05 / 06 章各页的**颗粒度拆分**（本轮只清掉了未解释术语，正文仍有「一页多主题」的问题）
+- 中段与进阶阶段未做同等程度的基线下调（用户当前不需要，且这两个阶段本身面向有基础的人）
+
+---
+
+## [2026-09-19] fix | PostgreSQL 知识库自查修正：补齐 12 处「用了但没讲」的函数
+
+- 触发原因：用户反馈「有的函数用了、但前面没讲到，像 `width_bucket` 这种，是不是默认我会用」——批评成立
+- 核查方式：全文 grep 函数调用点，逐个核对「首次出现位置是否配有讲解」，而非凭印象回应
+
+### 确认的问题（4 类）
+
+- **从未讲解**：`width_bucket`(2.1)、`date_bin`(2.3)、`range_agg`(数组专题)、`gin_clean_pending_list`(JSON 与 GIN 专题)
+- **归类错误**：`width_bucket` 原被塞进「取整与整除」组，它实为**分桶函数**，与整除无关
+- **结果写错**：`width_bucket(5,0,10,5)` 原注释为 `-- 2`，正确结果是 **3**
+- **只列名不说明**：`array_position`、`justify_days/hours/interval`、`regexp_*` 系列、`age`/`make_date`/`make_interval`
+- 根因：入门阶段为追求信息密度把函数压成「代码块清单 + 行尾注释」，对已会的人省事，对初学者等于默认前置知识（与 2026-09-19 RAG 重构同源：清单式罗列而非知识展开）
+
+### 治本：新增《函数手册》
+
+- 新建 `wiki/postgresql/函数手册.md`（meta）——15 节覆盖 200+ 个函数/运算符，每条给 **作用／签名／示例／详解位置**，作为「不认识任何函数」的兜底查询入口
+- 补收原先缺失项：`width_bucket`、`date_bin`、`range_agg`、`gin_clean_pending_list`、`pg_blocking_pids`、全文检索 11 个函数（`to_tsvector`/`plainto_tsquery`/`websearch_to_tsquery`/`ts_rank`/`setweight` 等）
+- 附「查不到函数时的四步法」：psql `\df 函数名` → `\h 语法` → 直接试算验证 → 官方文档
+- 附「阅读本套文档的约定」5 条
+
+### 修正内容（8 个文件）
+
+- `2.1-数值类型.md`：新增「三、数值分桶：`width_bucket`」独立小节（签名＋分桶过程表＋边界值＋直方图用例＋三分桶函数对比）；修正结果 2→3；新增取整函数块（round/trunc/ceil/floor 差异）；重排小节序号（插入后原出现重号「二」）
+- `2.3-日期时间类型.md`：新增 `date_bin` 小节（签名＋与 `date_trunc` 的选型表）；`justify_*` 补签名、三者差异表与「只影响显示、不改变时长」说明
+- `2.2-字符与二进制类型.md`：原「函数速查」纯罗列 → 按 6 组拆分并逐条说明；补 `~`/`~*`、`regexp_replace` 的 `g` 参数、表函数语义；修正 `concat_ws` 的含糊注释
+- `2.5-数组与JSON初步.md`：补 `array_position`/`array_positions` 返回语义（含「不存在返回 NULL」）；新增 `@>` vs `= ANY` 对比表
+- `数组范围与枚举/专题概览.md`：`range_agg` 四步拆解＋4 个相关函数的引入版本表
+- `JSON与JSONB/实战-半结构化建模与GIN索引.md`：新增「pending list 是什么」机制说明＋`::regclass` 含义
+- `索引内核/原理剖析-GIN-GiST-BRIN对比.md`：补 `gin_clean_pending_list` 返回值与 `::regclass`
+- `02-中段阶段-专题精讲/00-专题导航.md`：实验数据 SQL 逐行注释＋新增「免依赖版」建表脚本
+
+### 入口、索引与篇数校正
+
+- `README.md`：新增「〇、阅读前提（不假设您认识任何函数）」；入门篇数修正 20→21；新增「三篇常备参考」表
+- `速查索引.md`、`学习路线图.md`、三个阶段入口页：补 函数手册 指引
+- `index.md`：导航 3 页→4 页，补 函数手册 条目；2.1 摘要补「width_bucket 数值分桶」
+- 全库篇数核实：根导航 4 + 入门 21 + 中段 22 + 进阶 20 = **67 个文件**
+
+### 二次核查（自动化，不靠人工抽样）
+
+用 Python 写了两支校验脚本（经 `python.exe` 直调，shell 的 `ls`/`grep` 仍不可用）：
+
+1. **断链校验**：遍历全部 md，提取 wikilink 并比对目标文件是否存在
+   - 结论：**67 个文件、409 条 wikilink、断链 0**
+   - 两个必须处理的误报：① 表格单元格内 Obsidian 用 `\|` 转义别名分隔符，须先还原为 `|`；② 行内代码（单反引号）里的 `[[wikilink]]` 是语法示例，Obsidian 不解析，须先剥除
+2. **函数手册覆盖校验**：从正文提取 `name(` 形式的候选函数名（关键词黑名单去噪），逐个比对是否已收录
+   - 首轮结果：200 个候选中 **44 个未收录** → 逐项补齐后复测 **未收录 0**
+
+### 自动化核查暴露的额外缺口（已补）
+
+- **咨询锁整类缺失**：`pg_advisory_lock` / `pg_try_advisory_lock` / `pg_advisory_xact_lock` / `pg_advisory_unlock` / `pg_try_advisory_xact_lock` —— 新增独立小节，并给出「优先用事务级锁」的实践建议
+- **复制与恢复函数缺失**：`pg_is_in_recovery`、`pg_promote`、`pg_control_checkpoint` / `_system` / `_init` / `_recovery`、`pg_current_snapshot`、`pg_visible_in_snapshot`
+- **JSON 函数组缺失 11 个**：`jsonb_each` / `jsonb_each_text` / `jsonb_array_length` / `jsonb_build_array` / `jsonb_build_object` / `jsonb_pretty` / `jsonb_populate_record(set)` / `jsonb_path_match`，以及 `json_*` 同名系列
+- **诊断补充**：`pg_stat_reset`、`pg_stat_statements_reset`、`pg_get_serial_sequence`、`pg_get_functiondef`、`pg_sleep`、`ts_lexize`、`pg_stat_get_live_tuples`
+- **新增「容易混淆：下面这些都不是函数」表** —— 明确区分扩展名（`pg_stat_statements`）、系统视图（`pg_locks`）、列名（`correlation`）、配置参数（`shared_buffers`）、SQL 命令（`EXPLAIN`/`VACUUM`），避免初学者按函数调用后报 "function does not exist"
+
+### 顺带修正一处会误导的表述
+
+- `JSON与JSONB/专题概览.md`：原文「深合并需借助扩展（如 `jsonb_deep_merge`）」→ 改为「PostgreSQL 无内置深合并，`jsonb_deep_merge` 不是官方函数也不是扩展，是示例中自己 `CREATE FUNCTION` 创建的」。原文会让人去找一个不存在的扩展。
+
+### 固化约定
+
+- 新建 `.workbuddy/memory/MEMORY.md`，把「禁止清单式罗列／不假设前置知识／必须配总索引兜底入口」写成项目级硬性规则，并记录该错误在本库已出现两次（RAG 环节 + PostgreSQL 入门阶段），避免第三次复发
+
+---
+
+## [2026-09-19] supplement | RAG 知识库颗粒度重构（01–03 环节，25 页）
+
+- 触发原因：用户指出 `wiki/rag/` 内容「残废」——结构虽已按 14 步流程组织，但每个环节是「一页装所有」，把 5–8 个主题压在一页里，每主题只有一段话 + 一个表格，属清单式罗列而非知识展开
+- 诊断方法：抽样阅读 `02_数据清洗与规范化.md`（6.8 KB 装了去重/编码/结构/噪声/脱敏/分源模板六件事）与 `01_多源数据接入/多源数据接入.md`（3.7 KB 仅分类表与原则），确认问题在**颗粒度**而非结构调整
+- 重构策略：**保留顶层 14 步流程**，在每个环节内部按「总览页 + 专题页」展开；每页要求写到「机制 / 实操 / 陷阱」三层，宁可写透一个点也不罗列清单
+- 执行方式：6 个并行执行单元同时产出 + 主代理改造接入总览页
+
+| 环节 | 改造前 | 改造后 | 新增页面 |
+|---|---|---|---|
+| 01 数据接入与解析 | 2 页 | **9 页**（95 KB） | PDF解析、Word解析、HTML与网页解析、表格提取与处理、图片提取与描述化、元数据与溯源锚点、增量接入与去重 |
+| 02 数据清洗与规范化 | 1 页 | **6 页**（50 KB） | 文本规范化、噪声剔除、去重策略、质量过滤、脱敏与隐私 |
+| 03 智能分块 | 3 页 | **10 页**（85 KB） | 固定与递归分块、结构感知分块、语义分块、chunk大小与overlap取值、特殊内容分块、上下文增强分块、分块工具选型 |
+
+合计 **25 页 / 约 231 KB**。
+
+### 事实约束（写作时强制注入，来源为源码级验证或实测）
+
+- `generate_picture_images=True` **只对 PDF 生效**——`msword_backend.py` 全文零次出现该参数；该说法在网上广泛流传但为误传
+- DOCX 的 `PictureItem.prov` 为**空列表**（实测），故**没有页码与坐标**可溯源；可用替代锚点是 `self_ref`、标题链、文档流序号
+- 导出 Markdown 时图片只剩占位符，根因是 `export_to_markdown()` 的 `image_mode` **默认 `ImageRefMode.PLACEHOLDER`**（导出期参数，非解析期丢图）
+- Word backend 自动过滤装饰图：面积 ≤ 25 平方像素、全透明、纯白 → `ContentLayer.INVISIBLE`，而 `iterate_items()` 默认只遍历 `BODY` 层
+- 图注**不会自动关联**（backend 传 `caption=None`），需从相邻段落提取
+- DOCX 最小依赖链不含 torch，但 `document_converter` 的导入链会连带触发 PDF 后端，故 `docling-parse` 与 `pypdfium2` 必须装
+- 分块实测：递归 @512 token + 10~20% overlap 约 **69%** 检索准确率；overlap 超 30% 反噬；语义分块索引慢约 **14 倍**且增益常测不出；混合索引下 overlap 应压到 10~15%（对稀疏侧的三个副作用）
+- Contextual Retrieval 失败率降 **49%**、叠加重排降 **67%**
+
+### 质量校验
+
+- 链接完整性：651 条 wikilink 可解析；修复 4 处指向目录而非页面的失效链接后**断链为 0**
+- 抽样核对：`Word解析.md` 的关键事实（无开关、无页码、导出模式）表述准确，且主动标注为「常见误解」
+- 执行单元主动为不确定信息（部分解析器许可证、TableFormer 实现细节、智谱 embedding 上下文上限）标注「待核实」，未编造
+
+### 同步更新
+
+- `wiki/rag/RAG_学习路径导航.md`：01/02/03 环节收录页列表 + 结构变更记录
+- `index.md`：01/02/03 环节条目展开为完整页面清单
+
+---
+
+## [2026-09-19] ingest | 新建 PostgreSQL 学习知识库（三阶段 · 65 页）
+
+- 触发原因：用户开始学习 PostgreSQL，知识库中此前无任何相关内容，要求检索并整理核心学习资料，并按学习路径建立清晰的三阶段目录结构
+- 前置调研：核实 2026-09 版本现状 —— PostgreSQL **18.6** 为最新稳定版（18.0 GA 2025-09-25）；**19 Beta 3**（预计 2026-09 GA）；PG 14 将于 **2026-11-12 停止维护**；PG 17 于 2026-11 停止维护
+- 结构设计：按用户要求，三阶段采用**三种不同**的文件组织范式（理由：入门知识线性、中段知识网状、进阶知识分层递归）
+
+| 阶段 | 组织范式 | 目录特征 | 规模 |
+|------|----------|----------|------|
+| 入门 | 顺序章节式 | `第NN章-主题/` + 编号小节 | 6 章 · 20 页 |
+| 中段 | 平行专题式 | `专题名/`（无编号，可跳读） | 11 专题 · 22 页 |
+| 进阶 | 分层剖析式 | `内核模块/`（统一六段模板 + 实验） | 9 模块 · 20 页 |
+
+### 新增根导航（3 页）
+
+- `wiki/postgresql/README.md`（meta）— 版本基线与支线周期表、三阶段总览、组织范式选型理由、使用说明
+- `wiki/postgresql/学习路线图.md`（meta）— 三阶段能力出口、自测清单、推荐外部资料（含《The Internals of PostgreSQL》）
+- `wiki/postgresql/速查索引.md`（meta）— psql 元命令、系统视图、类型速查、SQL 骨架、调优参数、扩展速查
+
+### 入门阶段 `01-入门阶段-基础教程/`（20 页 · 顺序章节式）
+
+- 第01章 环境与初识（2）：概览与版本演进（含 PG18 五大变化的实践影响）、Docker 安装与 psql 入门
+- 第02章 数据类型（6）：数值类型（`numeric` vs `float` 取舍、`IDENTITY` 优于 `serial`）、字符与二进制（破除 `varchar(n)` 比 `text` 快的误解）、日期时间（`timestamp` vs `timestamptz` 存储机制差异）、布尔枚举与 UUID（PG18 `uuidv7()` 与索引局部性）、数组与 JSON 初步、NULL 语义与类型转换（三值逻辑、`NOT IN` 的 NULL 陷阱）
+- 第03章 建表与约束（2）：DDL 与生成列（**PG18 起生成列默认 VIRTUAL** 的升级影响）、约束体系（**外键列不自动建索引**导致的性能陷阱 + 排查 SQL）
+- 第04章 基础操作 CRUD（3）：INSERT 与 UPSERT（`xmax = 0` 判插入/更新、同批同键去重）、SELECT 基础、UPDATE 与 DELETE（追加写与膨胀机制）
+- 第05章 查询核心（4）：WHERE 与运算符（`LIKE` 前缀匹配依赖 `C` collation）、ORDER BY 与分页（键集分页）、聚合与 GROUP BY、多表连接 JOIN（`LEFT JOIN` 条件下放位置陷阱、`LATERAL`）
+- 第06章 事务与权限入门（2）：事务基础（PostgreSQL 的隔离级别实现映射、`40001` 需重试、长事务危害）、角色与权限入门（RLS、`ALTER DEFAULT PRIVILEGES`、PG18 弃用 md5）
+
+### 中段阶段 `02-中段阶段-专题精讲/`（22 页 · 平行专题式）
+
+- 窗口函数（3）：专题概览（frame 默认值随 `ORDER BY` 变化）、语法与函数速查、实战（TopN/累计/同比环比/连续 streak 的 `日期 - 行号` 技巧）
+- CTE 与递归查询（2）：专题概览（**PG12+ 物化/内联行为与 `MATERIALIZED` 显式控制**）、递归与树形结构（三种树存储方案、`SEARCH`/`CYCLE`）
+- JSON 与 JSONB（3）：专题概览、操作符与函数速查（含 `jsonb_to_record` 展开）、实战（高频键升为 `STORED` 生成列 + GIN 调优）
+- 数组范围与枚举（1）：`@>` 与 `= ANY` 语义差异、范围类型规范化、`EXCLUDE` 防重叠、枚举三方案决策树
+- 索引实战应用（3）：专题概览、类型选型与设计（六种索引方法 + 最左前缀矩阵）、慢查询索引优化（8 个真实案例）
+- 执行计划与性能诊断（2）：专题概览、`EXPLAIN` 逐字段解读（`Index Cond` vs `Filter`、`Heap Fetches`、SSD 必调 `random_page_cost`）
+- 全文检索（1）：中文方案的三种路径（`pg_trgm` / `zhparser` / 应用层预分词）
+- 分区表（1）：分区裁剪的写法约束、`DETACH` 归档、**PG18 两处行为变化**（VACUUM 默认处理子分区、禁止 UNLOGGED 分区表）
+- 视图函数与触发器（2）：专题概览（`security_invoker`、物化视图无增量刷新）、PL/pgSQL 编程（`EXCEPTION` 块即子事务的 xid 消耗）
+- 备份恢复与高可用（2）：专题概览（`synchronous_commit` 五档丢失边界、`pg_subscription_check`）、升级与迁移（`pg_upgrade` **PG18 保留统计信息**、逐项升级前检查清单）
+- 扩展生态（1）：`pg_stat_statements` / `pgvector`（HNSW vs IVFFlat）/ PostGIS / `pg_cron` / FDW
+
+### 进阶阶段 `03-进阶阶段-深度剖析/`（20 页 · 分层剖析式，统一六段模板）
+
+统一模板：**现象 → 机制 → 数据结构 → 源码路径 → 实验验证 → 生产启示**
+
+- 00 剖析方法论（1）：九模块依赖图、源码阅读方法、必备工具箱（`pageinspect`/`pgstattuple`/`pg_buffercache` 等）
+- 进程与内存架构（2）：多进程模型与连接成本、共享内存布局与缓冲池（`work_mem` 是"每操作"而非"每连接"的实测）
+- 存储引擎与页结构（3）：8KB 页与 `pd_lower`/`pd_upper` 几何、元组头与行指针（索引指向 lp 而非元组 → HOT 的基础）、TOAST 四级策略与压缩、**实验验证（10 个可执行实验）**
+- 事务与 MVCC 内核（2）：快照三字段与可见性判定伪码、`pg_xact` 与 hint bits（**只读查询也写 WAL** 的原因）、冻结与 xid 回绕防护
+- 索引内核（3）：B-tree 页结构/去重/右链 Lehman-Yao/**PG18 Skip Scan**、GIN/GiST/SP-GiST/BRIN 对比（**BRIN 唯一前提是 `correlation`**）、HOT 更新与索引维护（`REDIRECT` 行指针、fillfactor）
+- 查询优化器（2）：四阶段与代价模型（SSD 必调 `random_page_cost`、Nested Loop + 估算偏差 = 事故组合）、统计信息与基数估计（**扩展统计修正列间相关性**）
+- WAL 与崩溃恢复（2）：WAL 单一铁律、LSN 语义、full-page writes、`synchronous_commit` 五档边界、`wal_compression` 收益；Checkpoint 的 REDO 起点、PG17+ WAL 摘要加速恢复、`pg_control` 解读
+- 并发控制与锁内核（2）：四层锁体系、行锁靠 `xmax` 而非锁表、8 种表锁模式冲突矩阵（**DDL 取 ACCESS EXCLUSIVE**）、`SKIP LOCKED` 队列模式、死锁检测；SSI 的 rw 反依赖环与写偏斜实证（`REPEATABLE READ` 不报错但结果错）
+- 复制与高可用内核（2）：walsender/walreceiver/startup 三进程、三个 LSN 与延迟分类、复制槽高危性、同步提交与仲裁、备库查询冲突的两难；逻辑解码原理、`REPLICA IDENTITY`、**PG19 起复制序列值**、逻辑槽比物理槽更危险
+- 扩展与内核开发（1）：扩展三件套、预加载与钩子、后台 worker、安全模型、FDW 条件下推（`Remote SQL` 验证）
+
+### 同步更新
+
+- `index.md`：新增 `## postgresql` 分类（三阶段分节 + 全部 65 页链接），更新"最后更新"日期
+- 修正自己写作过程中的 3 处笔误（`2.3` 残留占位符、`3.1` 链接路径错字、`进程模型` 中虚构视图函数名）
+
+---
+
+## [2026-09-17] ingest | RAG 专题补充与 RAGAS v0.4 时效性修正
+
+- 触发原因：用户询问知识库中 RAG 相关记载，经核对发现 1 处 API 过时错误与 4 处内容缺口
+- 前置调研：核实 RAGAS 0.4.3、Docling 生态、多语言 embedding 选型（2026-09 现状）
+
+### 修正（P0 — 事实性错误）
+
+- `rag/12_评估与监控/评估体系与RAGAS.md`：原页（2026-08-28 更新）使用 v0.3 已弃用的 `evaluate()` + `ragas.metrics` 小写单例 API，晚于 v0.4 发布 7 个月
+  - 重写示例为 v0.4 collections API（`llm_factory` / `ascore(**kwargs)` / `MetricResult`）
+  - 补「四、RAGAS 版本演进与 API 变更」：0.3→0.4 六项破坏性变更对照表
+  - 补依赖冲突说明：`langchain-community` 锁 0.4.1、`instructor` 要求 openai<3
+  - 补「二、缩写与计算机制」「三、指标组合诊断矩阵」两个新章节
+  - 补 Q5：用国产/自建模型当裁判的 4 个注意点（embedding 端点缺失、结构化输出、中文判断力、max_tokens）
+
+### 新增页面（3 页）
+
+- `rag/06_混合检索/倒排索引.md`（concept）— 正排/倒排对比、词典+倒排列表结构、posting 字段（doc_id/tf/positions）、查询执行流程、FST 与增量编码压缩、跳表求交、与向量索引对比
+- `rag/03_智能分块/混合索引的分块策略.md`（concept）— 混合索引特有约束：两路必须共享 chunk_id（RRF 融合前提）、参数折中表、**overlap 对稀疏侧的三个副作用**（tf 重复计入/候选名额挤占/df 虚高）、标题链前置、表格与图片作独立伪段落、父块去重
+- `rag/04_混合索引构建/多语言与中英混排检索.md`（concept）— 三种混排形态分类、统一向量空间 vs 分语言索引、2026-09 embedding 选型表、预处理四件事、chunk 级语言检测、跨语言召回验证方法、双语索引方案
+
+### 补充已有页面（1 页）
+
+- `rag/01_多源数据接入/文档解析_PDF_Word_图片与表格.md`
+  - 原页完全未提及 Docling（当前表格解析标杆工具）
+  - 「四、Word 处理」补 Docling 定位与代码
+  - 「五、表格」补「摘要 + 原文双轨」设计（检索用摘要、生成用原表）
+  - 「八」节由速查表扩写为「解析器生态、选型与速查表」：loader 层次澄清 + 8 款工具横向对比（含 10 万页/月成本、许可）+ 分场景速查 + VLM 原生解析新范式 + 实测建议
+
+### 同步更新
+
+- `index.md`：03 / 04 / 06 三个环节各新增 1 条
+- `wiki/rag/RAG_学习路径导航.md`：收录页面表格 3 处 + 结构变更记录
+
+### 已核对为充分覆盖（无需改动）
+
+- `rag/06_混合检索/BM25算法详解.md`：jieba 分词已是重点章节，公式拆解完整
+- `rag/03_智能分块/文档分块策略.md`：父子分块、Late Chunking、Contextual Retrieval 均有
+- `rag/04_混合索引构建/检索索引类型与混合索引.md`：ANN 索引结构完整，与新增倒排索引页无重叠
+
+## [2026-09-10] lint | 知识库健康检查与全面修复
+- 触发原因：用户要求检查知识库内容完善度和结构错误
+- 扫描范围：384 个 wiki 页面，检查断链、frontmatter、导航覆盖、内容重叠
+- P0 修复（严重结构问题）：
+  - 重建 `index.md`（缺失的核心索引文件，SCHEMA 定义必需），覆盖全部 384 个页面
+  - 重写 `wiki/meta/Welcome.md`，补全所有板块导航入口（此前仅覆盖 3 个板块，遗漏 RAG/LangGraph/DeepAgents/Docker/FastAPI/Python/SQLModel/Tools 等）
+- P1 修复（断链与导航过时）：
+  - 新建 4 个缺失实体页：`tools/NotebookLM.md`、`tools/ChatGPT_File_Uploads.md`、`tools/Obsidian.md`、`tools/Obsidian_Web_Clipper.md`
+  - 修复 7 处路径错误断链：
+    - `agent/prompt/提示词工程.md`：`[[rag/04_评估监控]]` → `[[rag/12_评估与监控/评估体系与RAGAS]]`
+    - `fastapi/路径操作.md` + `fastapi/请求体与Pydantic.md`：`[[fastapi/参数验证]]` → `[[fastapi/请求体与Pydantic]]`
+    - `fastapi/请求体与Pydantic.md`：`[[fastapi/响应模型]]` → `[[fastapi/错误处理与响应模型]]`
+    - `rag/12_评估与监控/离线评估集.md`：修复 `\|` 转义问题（表格内 wikilink）
+    - `deepagents/overview/组件依赖全景.md`：`[[...AGENTS.md]]` → 去掉 `.md` 后缀
+    - `agent/harness/Agent沙箱与安全隔离.md`：`[[agent/memory/记忆系统设计]]` → `[[agent/memory/Agent_Memory]]`
+    - `langchain/memory/长期记忆.md`：`[[langchain/memory/记忆系统概述]]` → `[[langchain/memory/短期记忆]]`
+  - 重写 `langchain/LangChain_学习笔记.md` 目录结构（补入 modules/ 子树 100+ 篇、middleware/ 23 篇、memory/ 6 篇，此前缺失）
+- P2 修复（目录导航与分工边界）：
+  - 为 `docker/Docker沙箱概述.md` 添加目录导航（12 个页面列表 + 相关页面）
+  - 为 `agent/RAG/RAG.md` 添加目录导航（11 个页面列表）和与 `wiki/rag/` 的分工对照表
+- P3 修复（frontmatter 规范）：
+  - `tools/Docker.md`：补充完整 frontmatter（tags/created/updated/type + 标题行）
+  - `python/basics/数学函数.md`：补充 `type: concept` 字段
+
+## [2026-07-13] lint | 知识库健康检查与修复
+
 ## [2026-07-13] lint | 知识库健康检查与修复
 - 执行全面健康检查（Lint），扫描 228 个 wiki 页面
 - 修复问题：
@@ -1257,3 +1541,153 @@
 - 验证：断链 0 条
 - 资料时效：官方 docs + 社区 2026-08 核实（create_agent name 参数、langgraph-supervisor 包、Command handoff）
 - 更新日期：2026-08-24
+
+## [2026-08-28] supplement | 新建 wiki/rag 目录（6 层 RAG 系统学习路径，18 页）
+- 在 `wiki/` 下新建与 langchain/langgraph 平级的 `wiki/rag/` 目录，系统化覆盖 RAG 从入门到企业级生产全链路（区别于 agent/RAG 的 Agent 域视角）
+- 结构与页数：
+  - 入口：`RAG_学习路径导航.md`（六层总览 + 推荐路径 + 与既有 RAG 文档关系 + 全局权威来源清单）
+  - 01_基础原理（3）：RAG基础与演进全景 / Embedding与向量检索 / 向量数据库选型指南
+  - 02_检索进阶（3）：文档分块策略 / 混合检索与重排序 / 查询增强与上下文构建
+  - 03_框架实战（2）：LangChain_RAG实现（create_agent+retrieve_context）/ Agentic_RAG（LangGraph+Self-RAG/CRAG）
+  - 04_评估监控（2）：RAG评估体系与RAGAS / 生产可观测性
+  - 05_企业级生产（5）：生产级RAG系统架构 / 性能与成本优化 / 安全与合规 / 多租户与大并发 / 索引与部署流水线
+  - 06_前沿扩展（2）：GraphRAG与知识图谱 / 多模态与长上下文RAG
+- 每页含：frontmatter、知识点讲解、可运行代码示例、FAQ、最佳实践、资料出处（官方文档/论文链接，时效优先 2025-2026）
+- 关键引用来源：arXiv:2312.10997（RAG Survey）、LangChain/LangGraph 官方教程、Anthropic Contextual Retrieval、微软 GraphRAG (arXiv:2404.16130)、RAGAS、TruLens、OWASP LLM Top10 2025、MTEB
+- 交叉引用既有页面：agent/RAG 10 篇、langchain_retrievers 7 篇、langgraph/tutorial/RAG_Agent、meta/RAG_vs_Wiki 等，避免重复建设
+- 校验：断链 0 条（170 个 wikilink 全部可解析）；frontmatter 完整；表格内 wikilink 按库内规范使用裸 `|`
+
+## [2026-09-02] supplement | 补充 RAG 高级功能四篇（分块过滤/槽位映射/层级检索/双重校验）
+- 应用户要求，搜索权威资料后向 `wiki/rag/` 补充高级功能与应用 4 篇：
+  - `02_检索进阶/检索后过滤与上下文压缩.md`（分块过滤）：过滤/压缩/重排三操作对比；EmbeddingsFilter、LLMChainFilter、LLMChainExtractor、LLMListwiseRerank、DocumentCompressorPipeline 全家桶与成本排序原则；LangChain 官方 Contextual Compression 博客为出处
+  - `02_检索进阶/查询结构化与槽位映射.md`（槽位映射）：LangChain Query Construction 三路线（Text-to-Metadata-Filter/SQL/Cypher）；Pydantic verbose vs succinct schema、Literal 枚举、时间标准化、安全槽位（tenant_id 服务端强制覆盖）
+  - `02_检索进阶/句子窗口与自动合并检索.md`：LlamaIndex SentenceWindowNodeParser/MetadataReplacementPostProcessor 与 HierarchicalNodeParser/AutoMergingRetriever 完整代码；与 LangChain ParentDocumentRetriever 的对应
+  - `04_评估监控/生成校验与双重校验.md`：双重校验=证据侧+生成侧两道关卡；CoVe 四步流程与数据（Wikidata P 0.17→0.36、MultiSpanQA F1 0.39→0.48、FactScore 55.9→71.4，arXiv:2309.11495）；逐句引用核验代码；校验分级与拒答策略
+- 更新 `RAG_学习路径导航.md`：02/04 层表格加入新页、权威来源清单增加"校验与结构化"一行；「查询增强」页下一链改指向过滤压缩页（02 层链路连贯）
+- 校验：断链 0 条（216 个 wikilink / 22 文件全部可解析）
+- 资料时效：2026-09-02 检索核实（LangChain 官方博客与 API 参考、LlamaIndex 官方文档、CoVe 论文 ACL 2024）
+
+## [2026-09-04] restructure | 重构 wiki/rag 为流程化 12 步组织（内容零删除）
+- 由「基础-进阶-框架实战」分层，改为按 RAG 一条完整落地流程的 12 步组织；旧 6 个分层目录（01_基础原理/02_检索进阶/03_框架实战/04_评估监控/05_企业级生产/06_前沿扩展）已移除
+- 新目录（00~14）：00 导览与基础、01 多源数据接入、02 数据清洗与规范化、03 智能分块、04 混合索引构建、05 查询转换与改写、06 混合检索、07 元数据过滤、08 交叉编码器重排、09 上下文构建与溯源、10 LLM生成、11 安全审核与日志、12 评估与监控、13 工程横切、14 范式与前沿（支持子目录嵌套与原子化分册）
+- 既有 21 页全部迁移归位（内容零删除），其中 5 个合并主题原子化拆分：
+  - 混合检索与重排序 → 06/混合检索 + 08/重排序与交叉编码器
+  - 查询增强与上下文构建 → 05/查询改写与扩展 + 09/上下文构建
+  - 检索后过滤与上下文压缩 → 07/元数据过滤 + 09/上下文压缩
+  - 生成校验与双重校验 → 10/生成校验与防幻觉
+  - 安全与合规 → 11/安全与合规（完整迁移）
+- 补齐缺失环节新页 8 篇：01/多源数据接入、02/数据清洗与规范化、04/检索索引类型与混合索引、09/溯源与引用、10/LLM生成、11/审核与审计日志、12/离线评估集（前端另有 06/07/08/09/10 由拆分承接）
+- 全库批量改写 wikilink 路径映射（旧分层路径→新流程路径，共改写 18 个文件）；删除旧分层空目录
+- 重写 `RAG_学习路径导航.md` 为流程化索引（12 步速览 + 目录对照 + 阅读路径 + 权威来源清单 + 新维护约定，约束原子化与嵌套结构）
+- 校验：旧路径与悬空链接检查通过；新目录 15 个、页面 29 篇
+- 资料时效：沿用既有权威来源清单（RAG Survey、LangChain/LlamaIndex 官方、Anthropic、Cohere、OWASP 2025、RAGAS、TruLens），新补页均附具体出处
+
+## [2026-09-04] refine | 收敛 RAG 各类选型页（结论先给，选项收敛）
+- 目标：把"罗列大量并列选项"的选型页改为"少数方案 + 明确默认首选 + 适用/替换场景"，保留原对比表作参考、不删内容
+- 改动 5 页：
+  - `04/向量数据库选型指南`：新增"零、结论先给"——四处境首选（原型→Chroma、已有PG→pgvector、自建生产→Qdrant、超大/强多租户→Milvus/Weaviate）
+  - `04/Embedding与向量检索`：选模型小节改为"先照默认走"——自托管默认 BGE-M3、托管默认 text-embedding-3-large，换模型=全量重建索引
+  - `03/文档分块策略`：新增"一页结论：两个默认起点"——通用默认 Recursive(≈600/100)、问答质量优先 Parent-Child(子≈200/父≈1200)，其余 4 种为特定场景补位
+  - `08/重排序与交叉编码器`：重排模型默认——中文/自托管 bge-reranker-v2-m3、托管 Cohere Rerank v3.x
+  - `06/混合检索`：两种实现给默认——起步用应用层 EnsembleRetriever，已选原生混合库才切原生
+- 校验：仅新增"结论先给"块与改写个别段落，wikilink 与目录结构未变动
+
+## [2026-09-04] supplement | 新增 RAG 零基础问答总览与文档解析细化页（强化关联性）
+- 新增 `00_导览与基础/RAG零基础一问一答`（type: guide）：面向小白的问答式全链路关系线，覆盖"为什么 BM25 / 单独用 BM25 的缺陷 / 单独用向量的缺陷 / 混合+RRF / 分块与大小 / Word·PDF·图片·表格处理 / 防幻觉 / 评估"，每题附"属于哪一步→为什么→去读哪页"，并给"问题→环节→页面"速查表；在 00 基础页加"新手入口"反向链接
+- 新增 `01_多源数据接入/文档解析_PDF_Word_图片与表格`（type: concept）：细化 PDF（文本层/扫描件 OCR/多栏）、Word（python-docx/pandoc）、表格（保结构/句子化/整表一块）、图片（OCR+视觉模型）、公式/代码/CJK 格式处理，附工具速查表；01 接入页 Loader 表格指向该页
+- 导航 `RAG_学习路径导航` 在 00/01 两行收录新页；双向 wikilink 已双向挂接，未改动既有页面正文结论
+
+## [2026-09-08] supplement | 提示词工程页补充新手一问一答实战指南
+- 文件：`wiki/agent/prompt/提示词工程.md`
+- 触发原因：用户反馈"对提示词还是小白，内容偏纲要不够详细"，要求用问答形式细化补充
+- 在 `## AI 工程演进` 与 `## 来源` 之间新增 `## 新手一问一答（实战指南）`，含：
+  - 心智模型：提示词 = 给 LLM 的"任务说明书"
+  - Q1~Q10 共 10 个问答，每题附"对应上方哪个技巧"的 wikilink 回链
+  - 覆盖：基本原则（四条+对比示例）/ 角色设定 / Zero-shot vs Few-shot / CoT 思维链 / 防幻觉约束 / 结构化输出 / 提示词链 / XML 标签隔离 / 调试迭代流程 / AI 工程演进位置
+  - 末尾"速查表：从需求到技巧"（6 行：需求→技巧→知识库位置）
+- 交叉引用：关联 ReAct 模式、上下文工程、Prompt 高级技巧、RAG 评估监控等已有页面
+- 未修改原有正文内容，仅追加新章节
+
+## [2026-09-10] supplement | 新增 ANN 近似最近邻搜索专页 + 扩充四个薄页面
+- 触发原因：用户要求"细化和完善 RAG 中的内容"，经排查发现 ANN 缺独立专页、四个页面偏薄
+- 新增文件：
+  - `wiki/rag/04_混合索引构建/ANN近似最近邻搜索.md`（新建，type: concept）
+    - 四种 ANN 算法（HNSW/IVF/PQ/ScaNN）原理与类比
+    - HNSW 参数表 + 各向量库配置代码（Chroma/FAISS/pgvector）
+    - 精度调优实战（建立精确基线 → 调参逼近 Recall@k）
+    - 四条常见问答 + 算法选型速查表
+- 扩充文件（保留原有正文，仅追加新章节）：
+  - `数据清洗与规范化.md`：+完整清洗管线代码（去重/格式统一/噪声过滤/脱敏/5步管线）+ 按数据源清洗模板表 + 2条最佳实践
+  - `溯源与引用.md`：+完整代码（组装编号→生成标注→引用校验→前端渲染）+ 4条常见问答 + 1条最佳实践
+  - `LLM生成.md`：+结构化输出代码（RAGAnswer schema）+ 模型路由代码 + 流式输出 + 3套 Prompt 模板（标准/拒答优先/多文档对比）+ 4条常见问答
+  - `离线评估集.md`：+Golden Set 构建步骤与覆盖面要求 + RAGAS 完整评估代码 + 回归对比报告代码 + 四指标含义表与诊断思路
+- 关联更新：
+  - `RAG_学习路径导航.md` 第 04 行收录 ANN 新页
+- 校验：wikilink 全部可解析，frontmatter 完整
+- 文件：`wiki/rag/06_混合检索/BM25算法详解.md`（新建，type: concept）
+- 触发原因：用户要求详细讲解 BM25 算法并写进知识库
+- 内容：
+  - 从 TF-IDF 到 BM25 的演进（三个问题：TF 无上限 / 长文档占便宜 / IDF 不平滑）
+  - 完整公式拆成 4 个零件：IDF 平滑版 / TF 饱和函数 / 文档长度归一化 / 求和
+  - k₁ 和 b 参数表（默认值、调大/调小效果、适用场景）
+  - 手算例子：4 篇文档 + 查询"RAG 检索"，逐篇算出 IDF→TF 饱和→长度归一→最终分数→排序结果
+  - 倒排索引原理（O(命中文档数) 复杂度）
+  - RAG 中完整使用：管线位置图 + 从零搭建代码（jieba 分词 → BM25 索引 → 向量索引 → EnsembleRetriever 融合 → 接 LLM）
+  - 5 个关键配置表 + 场景判断表 + 3 个生产注意事项（文档更新重建 / 元数据过滤 / 中文分词器）
+- 关联更新：
+  - `RAG_学习路径导航.md` 第 06 行收录新页
+  - `混合检索.md` 导语加"BM25 算法公式拆解见 [[BM25算法详解]]"双向链接
+- 校验：wikilink 全部可解析，frontmatter 完整
+
+## [2026-09-10] supplement | 新增 Agent 沙箱与安全隔离专页
+- 触发原因：用户询问"沙箱对于 agent 来说是不可或缺的，真实开发中怎么配置？主流产品怎么配置的？"
+- 新增文件：`wiki/agent/harness/Agent沙箱与安全隔离.md`（新建，type: concept）
+- 内容结构（8 大章节）：
+  - 为什么 Agent 必须有沙箱：7 类风险表（误删/越权/依赖污染/网络外发/资源耗尽/持久化/命令注入）
+  - 五种隔离层次（从弱到强）：策略/审批 → OS-level → 容器 → MicroVM → 完整 VM，含速度/安全/代表产品对比
+  - 两种核心架构模式：Isolate the Tool vs Isolate the Agent，附 ASCII 架构图与选型口诀
+  - 主流产品沙箱配置对比：Codex CLI / TraeWork / Claude Code / OpenInterpreter / E2B / Code Interpreter
+    - 每种产品的：隔离机制、沙盒模式、OS 级实现、网络控制、审批策略
+    - 最后附 6 列总对比表
+  - 真实开发中三种配置方案：
+    - 方案 A：本地 OS-level（完整 Python 伪代码执行器）
+    - 方案 B：生产 E2B MicroVM（完整 Python 代码示例）
+    - 方案 C：LangGraph Agent 接入沙箱工具（@tool 装饰器写法）
+  - 沙箱配置清单（必配 6 项）：文件边界 / 网络控制 / 执行超时 / 资源限制 / 高危拦截 / 审批策略
+  - 5 条常见问答（能力影响 / 本地文件挂载 / Docker vs OS-level / 沙箱 vs 审核 / 越狱测试）
+  - 6 条最佳实践
+- 关联更新（反向链接）：
+  - `Agent_六种架构.md` → 相关概念加"Agent沙箱与安全隔离（工具调用安全基座）"
+  - `Function_Call.md` → 相关概念加"工具调用的安全执行必须在沙箱内进行"
+  - `安全与合规.md` → 相关资料加"Agent 执行层沙箱见 Agent沙箱与安全隔离"
+- 校验：wikilink 全部可解析，frontmatter 完整，3 个关联页面均有反向链接
+
+## [2026-09-10] supplement | 扩充 Agent 沙箱页：Windows 平台实现章节
+- 触发原因：用户使用 Windows，询问"Windows 沙箱怎么使用"，要求补充进知识库
+- 扩充文件：`wiki/agent/harness/Agent沙箱与安全隔离.md`（在"方案 C"后追加独立章节）
+- 新增内容（第六章，原第六~九章顺延）：
+  - 6.1 Windows 沙箱的两种形态对比表（Windows Sandbox vs AppContainer/Job Object）
+  - 6.2 Windows Sandbox（系统自带轻量 VM）：启用方式 + .wsb 自定义配置示例 + 适用场景
+  - 6.3 进程级沙箱：AppContainer 原理 + Job Object 资源限制表 + C# 完整实现示例
+  - 6.4 Windows 主流方案：WSL2 + Linux 沙箱（架构图 + 优缺点 + 启用命令）
+  - 6.5 Windows Agent 沙箱选型指南（4 级优先级表）
+  - 6.6 快速环境检查（4 条 PowerShell 命令）
+- 编号调整：原第六~九章顺延为第七~十章（配置清单 / 常见问题 / 最佳实践 / 相关导航）
+- 校验：原有内容未修改，仅追加新章节；所有 wikilink 正常
+
+## [2026-09-10] supplement | 扩充 Agent 沙箱页：Windows 工程设计小节（6.7~6.12）
+- 触发原因：用户询问"实际开发中 Windows 沙箱是怎么设计的"，需要从工程架构角度深化
+- 扩充文件：`wiki/agent/harness/Agent沙箱与安全隔离.md`（第六章追加 6.7~6.12 共 6 小节）
+- 新增内容：
+  - 6.7 工程设计：四层防御架构（执行器/资源限制/文件网络边界/审批层）+ ASCII 架构图
+    - 核心组件 1：SandboxExecutor 抽象基类 + WslExecutor/Win32Executor 双后端表
+    - 核心组件 2：PermissionPolicy（SandboxMode 三档 + can_read/can_write/can_access_network）
+    - 核心组件 3：ApprovalEngine（白名单/高危拦截/写操作审批 + 正则匹配高危命令）
+    - 核心组件 4：资源限制表（ProcessMemoryLimit/PerJobUserTimeLimit/ActiveProcessLimit 等）
+  - 6.8 WSL2 后端工程设计：完整架构图 + 三个关键设计点（专用发行版/挂载策略/网络控制）+ 四优势表
+  - 6.9 Windows 原生后端设计：架构图 + 三个难点（文件边界/网络控制/AppContainer 限制）
+  - 6.10 与 Agent 系统的集成：LangGraph → Tool Layer → SandboxExecutor 分层架构图 + 4 条集成要点
+  - 6.11 生产环境三个额外要求（热切换后端/健康检查/清理机制）
+  - 6.12 设计决策树（三问：能否装 WSL2 / 隔离强度 / 是否跨平台）
+- 编号说明：6.7~6.12 追加在第六章末尾，第七~九章（配置清单/常见问题/最佳实践）编号不变
+- 校验：所有原有章节未改动；新增 Python/C# 伪代码仅作示例；ASCII 架构图正确

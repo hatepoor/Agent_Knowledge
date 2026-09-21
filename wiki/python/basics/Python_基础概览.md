@@ -44,6 +44,18 @@ updated: 2026-07-08
 - [[python/advanced/类型提示进阶]] — TypeVar、泛型、Annotated、Agent 状态类型
 - [[python/advanced/序列化与状态管理]] — JSON/pickle、Checkpoint、Agent 状态持久化
 
+### 并发与并行（9 个子目录，46 个原子文件）
+- [[python/concurrency/并发并行总览]] — 本页，并发知识总览与导航
+- **01_GIL/** — GIL 原理与机制、性能量化、PEP 703、绕过策略（4 篇）
+- **02_threading/** — 模块概览、Thread 类、创建方式、异常处理、API、实战（6 篇）
+- **03_同步原语/** — Lock/RLock/Semaphore/Event/Condition/Barrier/选择指南（7 篇）
+- **04_multiprocessing/** — 概览、Process、Pool、IPC、共享内存、启动方式（6 篇）
+- **05_concurrent_futures/** — 概览、ThreadPoolExecutor、ProcessPoolExecutor、Future、as_completed（5 篇）
+- **06_线程安全/** — 原子操作、竞态条件、queue 模块、threading.local（4 篇）
+- **07_选型对比/** — 全景对比、性能基准、决策树、混合模式（4 篇）
+- **08_设计模式/** — 生产者-消费者、线程池、流水线、Fan-out/Fan-in、MapReduce（5 篇）
+- **09_性能调优与调试/** — 基准测试、Profiling、死锁、性能陷阱、调试工具（5 篇）
+
 ## Python 核心特性速览
 
 | 特性 | 说明 |

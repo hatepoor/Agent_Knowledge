@@ -8,6 +8,8 @@ source_url: https://docs.langchain.com/oss/python/langchain/overview
 
 # RAG LangChain 完整实现
 
+> 📌 **历史遗留页面**：权威内容见 [[rag/00_导览与基础/LangChain_RAG端到端实现]]。对照见 [[agent/RAG/README|RAG 迁移对照表]]。
+
 > 一套从文档加载到问答 Agent 的完整、可运行的 RAG 代码示例。基于 LangChain 最新 API（`langchain_core`、`langchain_community`、`langchain_openai`、`langchain_chroma`），包含两种检索策略的对比实现。
 
 > ⚠️ 本页面部分代码使用 langchain_community 导入（已弃用）。新项目请参考 [[langchain/modules/langchain_documents/文档加载器|文档加载器]] 页面的推荐方式。

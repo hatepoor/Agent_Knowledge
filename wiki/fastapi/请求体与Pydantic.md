@@ -164,7 +164,7 @@ async def update_item(
 
 ## 七、相关页面
 
-- [[fastapi/参数验证]] — Path/Query 参数校验
+- [[fastapi/请求体与Pydantic]] — Path/Query 参数校验
 - [[fastapi/路径操作]] — 路径参数与查询参数
-- [[fastapi/响应模型]] — response_model 控制输出
+- [[fastapi/错误处理与响应模型]] — response_model 控制输出
 - [[fastapi/与LangChain集成]] — Pydantic Model 在 Agent API 中的实践

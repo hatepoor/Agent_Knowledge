@@ -19,7 +19,7 @@ Agent 架构是指 Agent 系统中各组件的组织方式，决定了能力边�
 
 ### 1. 单 Agent 循环（Single Agent Loop）
 
-入门首选，实现简单。直接体现 [[agent/planning/ReAct]] 模式：每步"先想再做"，感知-推理-行动自然循环。
+入门首选，实现简单。直接体现 [[agent/patterns/ReAct]] 模式：每步"先想再做"，感知-推理-行动自然循环。
 
 - **优点**：最简单、易调试、适合边界清晰的任务
 - **缺点**：上下文窗口易撑满、复杂任务易偏航、无法并行
@@ -123,10 +123,12 @@ DAG 和 Agent 是互补关系。DAG 提供确定性骨架，Agent 提供灵活�
 ## 相关概念
 
 - [[agent/harness/Agent_三层架构]] — 六种架构是在三层架构（感知→思考→执行）基础上的不同组织方式
-- [[agent/planning/ReAct]] — 单 Agent 循环直接体现 ReAct 模式
+- [[agent/patterns/ReAct]] — 单 Agent 循环直接体现 ReAct 模式
+- [[agent/patterns/Agent模式总览]] — 各主流 Agent 模式的分册讲解、对比与选型
 - [[agent/RAG/RAG]] — RAG + Agent 架构的核心组件
 - [[agent/prompt/上下文工程]] — 所有架构都依赖上下文管理
 - [[agent/memory/Agent_Memory]] — 记忆系统贯穿所有架构
+- [[agent/harness/Agent沙箱与安全隔离]] — 所有架构执行工具调用的安全基座
 
 ## 来源
 
