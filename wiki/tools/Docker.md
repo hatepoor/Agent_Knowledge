@@ -1,13 +1,19 @@
 ---
-tags: [entity, tool, docker, 容器]
+tags: [entity, tool, docker, 容器, 速记]
 created: 2026-07-28
-updated: 2026-09-10
+updated: 2026-09-22
 type: entity
 ---
 
-# Docker
+# Docker（本机 PostgreSQL 容器操作速记）
 
-好的，针对你的 PostgreSQL 容器（容器名 `my-postgres`，数据库名 `agent_memory`），我帮你把常用的 Docker 命令整理成了 **5 个实用场景**。你可以把这个当作速查表：
+> ⚠️ **本页的定位：这是一份针对"本机 `my-postgres` 容器"的命令速记，不是 Docker 教程。**
+>
+> **想系统学习 Docker**（零基础起步 → 会构建镜像、会编排多容器）：从 [[docker/README]] 开始，或直接进入 [[docker/01-入门阶段-基础教程/第00章-学前准备/0.1-容器与Docker是什么]]。
+>
+> **想查命令与名词**：见 [[docker/Docker命令与术语手册]]（命令/参数/名词总索引）与 [[docker/速查索引]]（语法速查）。
+
+针对你的 PostgreSQL 容器（容器名 `my-postgres`，数据库名 `agent_memory`），下面是常用的 Docker 命令，按 **5 个实用场景**整理，可当作速查表：
 
 ---
 

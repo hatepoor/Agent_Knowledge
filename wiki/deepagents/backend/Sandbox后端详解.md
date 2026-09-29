@@ -139,7 +139,7 @@ agent = create_deep_agent(
 | Docker 沙箱（自建） | 可控、免费 | 需自己写隔离逻辑、维护镜像 |
 | LocalShellBackend | 零成本 | 不安全，禁止生产 |
 
-知识库中 [[docker/Docker沙箱概述]] 介绍了自建 Docker 沙箱方案。
+知识库中 [[docker/沙箱/Docker沙箱概述]] 介绍了自建 Docker 沙箱方案。
 
 ## 七、选择建议
 
@@ -156,6 +156,6 @@ agent = create_deep_agent(
 
 - [[deepagents/backend/后端概述]] — 6 种后端总览
 - [[deepagents/backend/Backend实战配置]] — 生产配置代码
-- [[docker/Docker沙箱概述]] — 自建 Docker 沙箱方案
-- [[docker/沙箱生产部署清单]] — 沙箱部署 checklist
+- [[docker/沙箱/Docker沙箱概述]] — 自建 Docker 沙箱方案
+- [[docker/沙箱/沙箱生产部署清单]] — 沙箱部署 checklist
 - [[deepagents/tools/内置工具概述]] — execute 工具位置

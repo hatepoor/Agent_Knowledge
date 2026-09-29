@@ -70,7 +70,7 @@ agent = create_deep_agent(
 | [[langchain/middleware/中间件概述]] | DeepAgents 默认中间件栈的基础 |
 | [[langchain/agents/Agent代理]] | `create_agent` → `create_deep_agent` 进化 |
 | [[agent/skills/Skills实现与集成]] | DeepAgents 内置了 SkillsMiddleware |
-| [[docker/Docker沙箱概述]] | Sandbox backend 支持的沙箱类型 |
+| [[docker/沙箱/Docker沙箱概述]] | Sandbox backend 支持的沙箱类型 |
 | [[fastapi/与LangChain集成]] | Deep Agent 部署为 FastAPI 服务 |
 
 ## 五、学习路径

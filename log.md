@@ -4,6 +4,126 @@
 
 ---
 
+## [2026-09-29] init | 新建 redis 主题知识库（入门阶段 15 篇 + 导航索引 4 页 + 章节目录 1 页）
+
+- 触发原因：用户开始学习 Redis，知识库中无相关内容（调查确认：无 `wiki/redis/`，仅 docker/langchain 等 21 个文件顺带提及）
+- 版本基线核实（2026-09-29）：Redis Open Source **8.10.2** 最新稳定（8.10.0 GA 2026-07-29）；8.2 为扩展支持版（至 2030-09-01）；8.0 将于 2026-12-01 EOL；**8.0 起许可证三选一（RSALv2/SSPLv1/AGPLv3），原 Stack 的 JSON/Search/TimeSeries 等并入开源版**；redis-py **8.1.0**（2026-07-30，MIT，Python 3.10+；8.0 起默认 RESP3 / 连接池上限 100 / socket_timeout 5s / 重试 10 次）
+- 结构决策：与 docker/postgresql 同构——`01-入门阶段-基础教程/`（顺序章节式）+ 顶层 `README` / `学习路线图` / `Redis命令与术语手册` / `速查索引`；中段（8 专题）与进阶（4 专题）写入路线图作为规划，未建正文
+- 写作基线：零前置假设、每篇「学习目标→前置知识→机制/实操/陷阱→小结→练习」、命令首次出现即解释或指向手册、特性标注引入版本（如 `KEEPTTL 6.0+`、`SINTERCARD 7.0+`、`BYSCORE 6.2+`）
+- 产出清单（`wiki/redis/` 共 20 个 md 文件）：
+  - **导航与索引（4 页）**：`README.md`（版本基线四事实）、`学习路线图.md`（含入门毕业自测清单）、`Redis命令与术语手册.md`（11 大类，含中段/进阶术语防恐慌表）、`速查索引.md`（命令骨架 + 响应前缀↔Python 返回类型对照 + 危险命令清单）
+  - **第00章 学前准备（4 篇）**：Redis 是什么（心智模型）、安装与启动（Docker 主推，Windows 无官方原生版）、redis-cli 第一次连接（五种响应前缀）、看懂报错信息（排错五步法 + 8 类报错）
+  - **第01章 键与五种核心数据类型（7 篇）**：Key/Value 世界观、类型总览选型表、String（SET 全选项 + INCR 原子性）、List（BLPOP 队列）、Hash（字段级读写）、Set（交并差）、SortedSet（名次 vs 分数区间）
+  - **第02章 过期与通用命令（2 篇）**：过期机制（惰性+定期删除、SET 清 TTL 坑）、通用命令与 SCAN（游标三条约定、DEL vs UNLINK）
+  - **第03章 redis-py（2 篇）**：连接（decode_responses、连接池、asyncio）、操作五种类型（返回类型对照、pipeline、Agent 缓存案例）
+- 同步更新：根 `index.md` 新增 redis 分区（docker 与 fastapi 之间）并更新维护日期
+- 交叉引用衔接：README「与其他知识库的衔接」链接 langchain/CacheBackedEmbeddings、agent/memory、rag/性能与成本优化、rag/向量数据库选型指南、docker 入门
+
+
+- 触发原因：用户指出"知识库中关于 docker 的都是讲 docker 作为沙箱时候的使用"，要求系统学习 Docker 的使用并重新整理相关内容
+- 问题定性：原 `wiki/docker/` 下 12 篇**全部**是 Agent 沙箱视角，没有一篇讲 Docker 通用使用；另有 `wiki/tools/Docker.md` 是本机 PostgreSQL 容器的命令速记，定位不清晰
+- 方案决策（经用户确认）：
+  - 沙箱内容**归入子专题** `wiki/docker/沙箱/`，定位从「Docker 的全部」降为「Docker 的一个应用场景」——**不删内容、不重写**
+  - 本次交付覆盖 **入门 + 中段** 两阶段（容器隔离内核等进阶原理留待后续）
+
+### 结构改动
+
+| 动作 | 对象 | 说明 |
+|------|------|------|
+| 新建 | `wiki/docker/01-入门阶段-基础教程/` | 顺序章节式 |
+| 新建 | `wiki/docker/02-中段阶段-专题精讲/` | 平行专题式 |
+| 新建 | `wiki/docker/沙箱/` | 应用专题 |
+| 迁移 | 原 12 篇沙箱文档 | 移入 `沙箱/`，并修正 12 个文件间的自引用链接 |
+| 新增 | `沙箱/00-沙箱专题导航.md` | 专区定位 + 前置要求 + 12 篇索引 |
+
+### 产出清单（docker 目录共 47 个 md 文件，均为本次新建原创）
+
+**导航与索引（4 页）**
+
+- `README.md` — 总览、版本基线（Engine 29.8.1 / Compose v5.5.1 / Desktop 4.91.0）、四条版本变更警示（`docker-compose` 废弃、containerd 镜像存储默认、Engine 29 API 门槛、Compose v5 与 v2 等同）、阅读门槛声明
+- `学习路线图.md` — 三阶段路径、能力出口、各阶段自测清单
+- `Docker命令与术语手册.md` — 命令 / 参数 / 名词 / 报错用词总索引（12 大类）
+- `速查索引.md` — 命令骨架、`docker run` 参数分区、Dockerfile 骨架、compose.yaml 模板、危险命令清单
+
+**入门阶段（6 章 20 篇）**
+
+| 章 | 篇数 | 内容要点 |
+|----|------|----------|
+| 第00章 学前准备 | 5 | 容器 vs 虚拟机、四层运行架构与 `run` 完整旅程、安装（Windows/WSL2 要求 + 镜像加速器）、五层报错定位法与 12 类报错、20 个核心名词与学习地图 |
+| 第01章 镜像与容器基础操作 | 3 | 镜像名结构 / tag 与 `latest` 陷阱；**PID 1 与"容器为何立刻退出"**；`exec` vs `attach` |
+| 第02章 镜像构建与 Dockerfile | 3 | 全部指令（含 CMD/ENTRYPOINT 行为矩阵、ENV 与 ARG 作用域）；构建上下文与分层缓存；多阶段构建与 20 条最佳实践 |
+| 第03章 数据卷与容器网络 | 3 | 三种挂载对比与 UID 权限坑；bridge/host/none 与自定义网络内置 DNS；端口方向与四种绑定形式 |
+| 第04章 多容器编排 Compose | 3 | 四个顶层字段与项目名前缀；应用+PG+Redis 完整编排（`healthcheck` + `condition: service_healthy`）；`.env` 与 `env_file` 的本质区别 |
+| 第05章 资源限制与日常维护 | 3 | swap 语义与 OOM 诊断；五个磁盘占用来源、日志轮转、清理三档分级；七类现象排查序列 |
+
+**中段阶段（8 专题 8 篇）**
+
+- 镜像优化与瘦身 / 数据持久化与备份 / 网络进阶与多容器互联（veth·bridge·NAT·内置 DNS）/ 容器安全加固（capabilities·seccomp·只读根文件系统 + 加固清单）/ 资源限制与性能（cgroup·CPU 限流诊断·容量规划）/ 日志与监控（PLG 栈 + 三层监控）/ 编排与自动化（Compose 进阶 + Docker SDK 动态控容器）/ CI-CD 与镜像分发（tag 策略·buildx 多平台·供应链安全·回滚）
+
+### 关联更新
+
+- `index.md`：docker 段落由「Docker 沙箱（12 行平铺）」重写为三阶段结构（导航 4 + 入门 20 + 中段 8 + 沙箱 13）
+- 修正 7 个外部文件对沙箱页面的链接路径（`docker/xxx` → `docker/沙箱/xxx`）：`deepagents/backend/Backend实战配置`、`deepagents/backend/Sandbox后端详解`、`deepagents/backend/后端概述`、`deepagents/overview/DeepAgents概述`、`deepagents/production/生产部署`、`deepagents/tools/内置工具概述`、`meta/Welcome`
+- `wiki/tools/Docker.md`：加定位声明，明确其为「本机 PostgreSQL 容器操作速记」并指向新的系统教程入口；`index.md` 中该条描述同步修正
+- `meta/Welcome.md`：docker 板块由 12 页更新为 47 页，合计数同步
+
+### 校验
+
+- 全库 wikilink 断链检查：**0 断链**（log.md 内路径为反引号代码格式，非 wikilink，不受影响）
+- 文档中的篇数统计经**实际文件计数**核实（曾误写"18 篇"，已修正为 20 篇）
+- 技术内容版本基线经联网核实（Docker Engine 29.8.1 / Compose v5.5.1 / Docker Desktop 4.91.0）
+
+### 已知待办
+
+- 进阶阶段（容器隔离内核：namespace/cgroup 实现、联合文件系统、OCI 规范与 runc/containerd、镜像分层与内容寻址、veth/bridge/NAT 网络内核）尚未编写，`README` 与 `学习路线图` 中已标注为"规划中"
+
+---
+
+## [2026-09-21] supplement | 新建 Docling 知识库（10 页 · 由浅入深六层）
+
+- 触发原因：用户要求构建一套关于 Docling 的知识库，按「由浅入深、由表层到深层」六层组织：① 定位与适用场景 → ② 整体架构与核心组件 → ③ 从简到繁的示例 → ④ 处理后生成的结构 → ⑤ 在此基础上进一步处理 → ⑥ 自定义与扩展
+- 产出位置：`wiki/docling/`（新建主题域，与 `wiki/rag/`、`wiki/langchain/` 等平级）
+
+### 产出清单（10 页 / 约 97 KB；链接 67 条全部可解析，断链 0）
+
+| 页 | 对应层次 | 字节数 |
+|---|---|---|
+| `README` | 全库入口 + 三条阅读路径 | 5,779 |
+| `01_定位与适用场景` | ① | 6,005 |
+| `02_整体架构与核心组件` | ② | 11,033 |
+| `03_快速上手_最小可用示例` | ③（简） | 6,949 |
+| `04_进阶用法_配置与选项` | ③（繁） | 7,975 |
+| `05_DoclingDocument结构详解` | ④ | 10,858 |
+| `06_后续处理_导出分块与抽取` | ⑤ | 15,496 |
+| `07_自定义与扩展` | ⑥ | 12,881 |
+| `08_格式支持与依赖管理` | 横向支撑 | 10,688 |
+| `09_已知陷阱与边界` | 横向支撑 | 11,425 |
+
+### 源码核实的架构事实（写作时强制注入）
+
+- **34 种输入格式**：Office 7 / OpenDocument 3 / Web-文本 8 / PDF / 图像 / CSV / XML 系 5 / 专业存档 4 / 媒体 3 / 原生格式 1
+- **26 个 backend**，抽象为三类基类：`AbstractDocumentBackend` / `PaginatedDocumentBackend` / `DeclarativeDocumentBackend`
+- **28 个 FormatOption 的 `pipeline_cls` 逐条核实**：
+  - `SimplePipeline`（**无模型**）覆盖 **22 个**：Word / Powerpoint / Excel / Odt / Ods / Odp / Markdown / AsciiDoc / HTML / CSV / BoxNote / PatentUspto / XMLJats / XMLDocLang / Dclx / XBRL / IWorkPages / Latex / Email / Epub / Ebcdic / Afp
+  - `StandardPdfPipeline`（含模型）覆盖 Pdf / **Image** / MetsGbs —— **图像格式也走 PDF 管线**，因需 OCR 与 layout 模型
+  - `NativePdfPipeline`（无模型 PDF）/ `AsrPipeline` / `VideoPipeline`
+- **元素类型完整清单**：`TextItem` 按 label 细分 13 种（PARAGRAPH / TEXT / CAPTION / FOOTNOTE / PAGE_HEADER / FOOTER / REFERENCE / MARKER / CHECKBOX_* / FIELD_KEY / HINT / HANDWRITTEN_TEXT / EMPTY_VALUE）、`TitleItem`、`SectionHeaderItem(level)`、`ListItem`、`FormulaItem`、`CodeItem(code_language)`、`PictureItem(PICTURE/CHART)`、`TableItem(TABLE/DOCUMENT_INDEX)`、`KeyValueItem`、`FormItem` 及字段表单系列（FieldRegion / Field / FieldHeading / FieldValue）；容器 `GroupItem` + `ListGroup`/`InlineGroup`，`GroupLabel` 含 LIST / PICTURE_AREA / CHAPTER / SECTION / SLIDE
+- **`prov`** = `page_no` / `bbox` / `charspan`；**`ContentLayer` 五层** = BODY / FURNITURE / BACKGROUND / INVISIBLE / NOTES，`DEFAULT_CONTENT_LAYERS = {BODY}`
+- **transforms 五子包**：serializer / chunker / deserializer / **visualizer** / profiler
+  - serializer 类名（9 个）：`MarkdownDocSerializer`、`HTMLDocSerializer`、`DocTagsDocSerializer`、`DocLangDocSerializer`、`AzureDocSerializer`、`LaTeXDocSerializer`、`PlainTextDocSerializer`、`MsExcelMarkdownDocSerializer`、`WebVTTDocSerializer`
+  - **visualizer 在 DOCX 上不可用**：`LayoutVisualizer` / `ReadingOrderVisualizer.get_visualization()` 返回 `dict[page_no, PIL.Image]`，依赖 `generate_page_images=True`，而 DOCX 无页图像且 `prov` 为空
+
+### 同步更新
+
+- `index.md`：新增 `## docling — 文档解析与结构化` 分类（按六层组织，插在 rag 与 langchain 之间）
+- 本日志
+
+### 方法说明
+
+沿用 09-19 的并行执行方式：4 个执行单元各 2–3 页，prompt 固定「硬性写作规范 + 已核实事实（照用勿改）+ 需自行从本地源码核实的内容」三段。本次特别要求执行单元**自行读本地 `docling_core` 源码核实元素类型与 serializer 类名**，而非依赖转述——核实结果比预期丰富（元素类型 13 种 label、序列化器 9 个、visualizer 的 DOCX 限制）。核验阶段由主代理用正则脚本提取 `pipeline_cls` 映射，补齐了执行单元标记的「待核实」项。
+
+---
+
 ## [2026-09-21] update | README.md 重写：从模板级扩展为知识库全景导览
 
 - 触发原因：用户反馈 README 内容太简略，仍是初始模板状态，与 533 页的实际规模不匹配
