@@ -2,7 +2,7 @@
 tags: [meta, redis, 术语, 命令, 索引, 零基础]
 type: meta
 created: 2026-09-29
-updated: 2026-09-29
+updated: 2026-10-06
 ---
 
 # Redis 命令与术语手册
@@ -175,6 +175,8 @@ updated: 2026-09-29
 | `OOM command not allowed` | 内存超 `maxmemory` 且策略拒绝写入（中段） | 同上 |
 | `MISCONF` | RDB 快照写盘失败导致拒绝写入（中段） | 同上 |
 | `Connection refused` | 连不上服务（服务没起 / 端口没映射 / 连错地址） | 同上 |
+| `QUEUED` | 事务模式下命令成功入队的响应（不是错误） | [[redis/02-中段阶段-生产实践/04-事务与Lua脚本]] |
+| `BUSYGROUP` | 消费者组已存在的报错（重复建组，可安全忽略） | [[redis/02-中段阶段-生产实践/02-发布订阅与Stream]] |
 
 ## 十一、术语与名词 ⭐
 
@@ -190,8 +192,125 @@ updated: 2026-09-29
 | TTL | Time To Live，key 的剩余寿命 | [[redis/01-入门阶段-基础教程/第02章-过期机制与通用Key命令/2.1-Key的过期机制]] |
 | 网络往返（RTT） | 一条命令 = 客户端→服务端→回来；批量的动机 | [[redis/01-入门阶段-基础教程/第01章-键与五种核心数据类型/1.3-String字符串]] |
 | 管道（pipeline） | N 条命令一次发出（网络优化，非事务） | [[redis/01-入门阶段-基础教程/第03章-Python客户端redis-py/3.2-操作五种数据类型]] |
+| 热 key | 单 key QPS 占比过高的键，引发单分片倾斜 | [[redis/02-中段阶段-生产实践/10-大Key与热Key治理]] |
 
-## 十二、中段/进阶术语（只报名字，防恐慌用）
+## 十二、中段扩展命令（生产实践专题用）
+
+### 持久化
+
+| 词 | 一句话解释 | 出现在哪 |
+|----|-----------|----------|
+| `BGSAVE` / `SAVE` | 手动触发快照（后台 / 同步阻塞，后者生产禁用） | [[redis/02-中段阶段-生产实践/01-持久化-RDB与AOF]] |
+| `BGREWRITEAOF` | 手动触发 AOF 重写 | 同上 |
+| `save 秒 次数`（conf） | RDB 触发规则 | 同上 |
+| `appendonly` / `appendfsync`（conf） | AOF 开关 / 落盘策略（always/everysec/no） | 同上 |
+| `aof-use-rdb-preamble`（conf） | 混合持久化（`4.0+`，默认开） | 同上 |
+| `redis-check-rdb` / `redis-check-aof --fix` | 持久化文件校验修复工具 | 同上 |
+| fork / COW（写时复制） | 快照与重写的底层机制：子进程共享内存页 | 同上 |
+
+### Stream 与 Pub/Sub
+
+| 词 | 一句话解释 | 出现在哪 |
+|----|-----------|----------|
+| `XADD k [MAXLEN ~ n] * f v...` | 追加消息，自动生成时间序 ID | [[redis/02-中段阶段-生产实践/02-发布订阅与Stream]] |
+| `XGROUP CREATE k 组 ID` | 建消费者组（0 全量 / $ 只新消息） | 同上 |
+| `XREADGROUP GROUP 组 消费者 COUNT n BLOCK ms STREAMS k >` | 组内取消息（> 取未投递的） | 同上 |
+| `XACK` | 确认消息（移出 pending） | 同上 |
+| `XPENDING` / `XAUTOCLAIM`（`6.2+`） | 查 pending / 按空闲时间接管重投 | 同上 |
+| `XRANGE` / `XREVRANGE` / `XLEN` / `XTRIM` | 回放 / 长度 / 修剪 | 同上 |
+| `XINFO GROUPS` / `XINFO CONSUMERS` | 组与消费者的状态 | 同上 |
+| `SUBSCRIBE` / `PUBLISH` / `PSUBSCRIBE` / `UNSUBSCRIBE` | Pub/Sub 四件套（无持久化广播） | 同上 |
+| pending 列表（PEL） | 已投递未确认的消息集合，不丢消息的关键 | 同上 |
+| at-least-once / 幂等 | 可能重复投递 → 消费端去重设计 | 同上 |
+
+### 事务与脚本
+
+| 词 | 一句话解释 | 出现在哪 |
+|----|-----------|----------|
+| `MULTI` / `EXEC` / `DISCARD` | 事务：入队 / 执行 / 放弃 | [[redis/02-中段阶段-生产实践/04-事务与Lua脚本]] |
+| `WATCH k` | 乐观锁：被改过则 EXEC 返回 nil | 同上 |
+| `EXECABORT` | 入队阶段有错，整个事务放弃 | 同上 |
+| `EVAL 脚本 numkeys k... a...` | 执行 Lua 脚本（服务端原子） | 同上 |
+| `EVALSHA` / `SCRIPT LOAD` / `NOSCRIPT` | 按摘要执行 / 预载 / 缓存未命中 | 同上 |
+| `FUNCTION LOAD` / `FCALL`（`7.0+`） | 持久化函数库 | 同上 |
+| `SCRIPT KILL` | 终止只读长脚本（写过就不能杀） | 同上 |
+| `redis.WatchError` / `register_script` 📦 | redis-py 的乐观锁异常 / 脚本封装 | 同上 |
+
+### 性能
+
+| 词 | 一句话解释 | 出现在哪 |
+|----|-----------|----------|
+| `SLOWLOG GET/RESET`（conf: slowlog-log-slower-than） | 慢命令日志（服务端执行耗时） | [[redis/02-中段阶段-生产实践/05-管道与性能]] |
+| `LATENCY HISTORY/LATEST`（conf: latency-monitor-threshold） | 服务端停摆事件（fork 等） | 同上 |
+| `MEMORY USAGE k` | 某键精确内存占用 | [[redis/02-中段阶段-生产实践/05-管道与性能]] / [[redis/02-中段阶段-生产实践/10-大Key与热Key治理]] |
+| `redis-cli --bigkeys` / `--memkeys` / `--hotkeys` | 采样扫描大 key / 内存大户 / 热 key（hotkeys 需 LFU 策略） | [[redis/02-中段阶段-生产实践/05-管道与性能]] / [[redis/02-中段阶段-生产实践/10-大Key与热Key治理]] |
+| `redis-benchmark` | 官方压测工具 | 同上 |
+| `OBJECT FREQ`（`4.0+`，LFU 策略下） | 查键的访问频率计数 | [[redis/02-中段阶段-生产实践/07-内存淘汰与maxmemory]] |
+
+### 淘汰与高可用
+
+| 词 | 一句话解释 | 出现在哪 |
+|----|-----------|----------|
+| `maxmemory`（conf） | 内存上限；触发淘汰的开关 | [[redis/02-中段阶段-生产实践/07-内存淘汰与maxmemory]] |
+| `maxmemory-policy`（conf） | 8 种淘汰策略（noeviction 默认） | 同上 |
+| `maxmemory-samples` / `lfu-decay-time`（conf） | 近似 LRU 采样数 / LFU 衰减 | 同上 |
+| `evicted_keys`（INFO stats） | 已被淘汰的键数——存储场景 >0 即事故 | 同上 |
+| `lazyfree-lazy-*`（conf） | 过期/淘汰/隐式删除的异步释放 | 同上 |
+| `REPLICAOF 主 端口`（旧名 `SLAVEOF`） | 使本库成为从库 | [[redis/02-中段阶段-生产实践/08-高可用-主从哨兵集群]] |
+| `READONLY` | 从库默认只读的报错词 | 同上 |
+| `WAIT n 毫秒` | 等待 n 个从库确认（缓解异步复制旧读） | 同上 |
+| `repl-backlog-size` / `min-replicas-to-write`（conf） | 复制积压缓冲 / 脑裂防护 | 同上 |
+| `SENTINEL monitor ... quorum` / `redis-sentinel` | 哨兵配置与进程 | 同上 |
+| SDOWN / ODOWN | 主观 / 客观下线（quorum 判定） | 同上 |
+| `master_for` 📦 | redis-py 经哨兵发现主库的客户端 | 同上 |
+| `CLUSTER` / `MOVED` / `CROSSSLOT` / hash tag `{...}` | 集群路由 / 重定向 / 跨 slot 报错 / 同 slot 手段 | 同上 |
+| 脑裂（split-brain） | 网络分区期间旧主还在收写的丢失窗口 | 同上 |
+| 跳变窗口 / 看门狗（watchdog） | 锁提前失效问题 / 自动续期机制 | [[redis/02-中段阶段-生产实践/06-分布式锁]] |
+| Redlock / fencing token | 多数派锁方案及其争议 / 单调编号防旧写 | 同上 |
+| 布隆过滤器（Bloom Filter） | 概率判存结构：说不存在必真不存在 | [[redis/02-中段阶段-生产实践/03-缓存三大问题与缓存模式]] |
+| Cache-Aside / 逻辑过期 / 延迟双删 | 旁路缓存模式 / 不阻塞的热点重建 / 清在途回填 | 同上 |
+
+### 一致性与缓存同步
+
+| 词 | 一句话解释 | 出现在哪 |
+|----|-----------|----------|
+| 先库后删 | 写序标准答案：更新数据库后删缓存 | [[redis/02-中段阶段-生产实践/09-缓存一致性-与数据库同步]] |
+| 在途回填 | 读请求把旧值写回缓存的时序竞争 | 同上 |
+| binlog / WAL 订阅 | 订阅数据库变更日志统一删缓存（Canal / Debezium） | 同上 |
+| 读己之写 | 用户写后立刻读的部分强制走主库 | 同上 |
+
+### 安全与监控
+
+| 词 | 一句话解释 | 出现在哪 |
+|----|-----------|----------|
+| `bind 地址`（conf） | 服务监听的网卡地址（永不配公网） | [[redis/02-中段阶段-生产实践/11-安全加固与生产监控]] |
+| `protected-mode`（conf） | 无密码且未显式 bind 时拒绝远程（默认开，非认证） | 同上 |
+| `ACL SETUSER 用户 on >密码 ~模式 +@类 -@类` | 创建具名用户：启用/密码/key 模式/命令类别（`6.0+`） | 同上 |
+| `ACL LIST/GETUSER/CAT/WHOAMI/SAVE/LOG` | 查用户 / 查命令类别 / 当前身份 / 持久化 / 违规审计 | 同上 |
+| `aclfile`（conf） | ACL 用户规则的独立文件 | 同上 |
+| `default` 用户 | 内置账号，加固时必须设密码或禁用 | 同上 |
+| `masteruser` / `masterauth`（conf） | 从库连主库的认证 | 同上 |
+| `rename-command`（conf） | 命令改名治理（遗留方式，推荐 ACL 替代） | 同上 |
+| `tls-port` / `tls-cert-file`（conf） | TLS 加密端口与证书（`6.0+`） | 同上 |
+| `keyspace_hits` / `keyspace_misses`（INFO stats） | 命中/未命中计数 → 命中率 = hits/(hits+misses) | 同上 |
+| `rejected_connections`（INFO stats） | 超 `maxclients` 被拒的连接数，>0 即告警 | 同上 |
+| `latest_fork_us`（INFO stats） | 最近一次 fork 耗时（微秒） | 同上 |
+| `master_link_status`（INFO replication） | 从库连主状态，down 即告警 | 同上 |
+| `redis_exporter` + Prometheus + Grafana | 常见监控采集展示栈（指标同源 INFO） | 同上 |
+| `--user / --pass`（redis-cli） | ACL 具名用户的登录参数 | 同上 |
+
+### Agent 实战与限流
+
+| 词 | 一句话解释 | 出现在哪 |
+|----|-----------|----------|
+| 死信队列（DLQ） | 重试超限任务进入的告警流 | [[redis/02-中段阶段-生产实践/12-Agent场景实战-缓存会话与任务分发]] |
+| `XREADGROUP ... CLAIM min-idle`（`8.4+`） | 取新消息兼接管空闲 pending 的一步式命令 | 同上 |
+| 固定窗口限流 | `INCR`+`EXPIRE` 用 Lua 绑原子的计数限流 | 同上 |
+| 令牌桶（token bucket） | 按速率补充令牌的平滑限流算法 | 同上 |
+| `RedisSaver` / `langgraph-checkpoint-redis` 📦 | LangGraph 的 Redis 检查点器 | 同上 |
+| `CacheBackedEmbeddings` 📦 | LangChain 的 embedding 缓存封装（Redis 作后备） | 同上 |
+
+## 十三、中段/进阶术语（只报名字，防恐慌用）
 
 | 词 | 一句话解释 | 详见 |
 |----|-----------|------|

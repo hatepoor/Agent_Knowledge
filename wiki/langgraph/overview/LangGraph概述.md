@@ -217,9 +217,30 @@ print(result["text"])  # 输出：你好！欢迎使用 LangGraph 再见！
 - 如果你的工作流是**线性的、无状态的**，用 LangChain
 - 如果你的工作流需要**循环、条件分支、状态管理**，用 LangGraph
 
+## ⚠️ 本页是 Python 版
+
+⚠️ **本页及其所属目录讲的是 Python 版 LangGraph。** LangGraph 同时有官方 **JS/TS 版（LangGraph.js v1）**，核心概念一致（节点/边/状态图/检查点/HITL），但 API 形态有实质差异：
+
+| 差异点 | Python | TypeScript |
+|--------|--------|-----------|
+| 状态定义 | `Annotation.Root` + Pydantic/TypedDict | ⭐ **`StateSchema`（基于 Zod）**，`Annotation.Root` 是遗留别名 |
+| Reducer | `Annotated[list, add_messages]` | `ReducedValue` / `MessagesValue` |
+| 上下文 | `config["configurable"]` | `config.context` |
+| 类型推导 | `mypy` 插件 | ⭐ `typeof State.State` / `typeof State.Update` |
+
+| 你要写的语言 | 从哪开始 |
+|-------------|---------|
+| **Python** | 本页 → [[langgraph/quickstart/快速入门]] |
+| **TypeScript / JavaScript** | ⭐ [[typescript/03-生态连接-LangChain与LangGraph/4-LangGraph-js状态图实战|LangGraph.js 状态图实战]] → [[typescript/03-生态连接-LangChain与LangGraph/5-LangGraph-js持久化与人工介入|持久化与人工介入]] |
+| **两边都要 / 做双栈选型** | [[typescript/03-生态连接-LangChain与LangGraph/6-Python与TypeScript双栈对照|Python 与 TypeScript 双栈对照]] |
+
+⚠️ **生态差异的实话**：LangGraph 的新特性与第三方 checkpointer 后端**总是 Python 先出**，TS 侧跟进。详见双栈对照篇。
+
 ## 相关页面
 
 - [[langgraph/quickstart/快速入门|快速入门]] — 从零开始构建你的第一个 LangGraph 应用
 - [[langgraph/modules/LangGraph模块详解|模块详解]] — 所有模块的导航页
 - [[langgraph/modules/langgraph_core/概述|核心模块]] — StateGraph、节点、边的详细 API
 - [[langchain/overview/LangChain概述|LangChain 概述]] — LangChain 在 Agent 生态中的定位
+- [[typescript/03-生态连接-LangChain与LangGraph/4-LangGraph-js状态图实战]] — ⭐ TypeScript 侧的状态图实战
+- [[typescript/03-生态连接-LangChain与LangGraph/6-Python与TypeScript双栈对照]] — ⭐ Python ↔ TypeScript 完整 API 对照表

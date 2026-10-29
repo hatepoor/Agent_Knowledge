@@ -28,6 +28,13 @@ MCP 是 [[agent/harness/Function_Call]] 的标准化升级：
 - MCP 是协议级别的工具连接标准
 - 两者配合：Agent 通过 Function Call 机制，经由 MCP 协议调用外部工具
 
+## 与 A2A 的关系
+MCP 与 [[a2a/README|A2A]] 是互补而非替代关系：
+- **MCP** 用于**纵向**扩展：连接 API、数据库、外部工具（需要编码+服务器）
+- **A2A** 用于**横向**协作：让不同团队/厂商的独立 Agent 发现彼此、委派任务、交换结果
+- 一句话记法：**MCP 让智能体拿到工具，A2A 让智能体找到同行**
+- ⚠️ 同一代码库内的多个 Agent **不需要** A2A，直接函数调用即可
+
 ## 与 Skills 的对比
 MCP 与 [[agent/skills/Skills]] 是 Agent 生态中互补的两种能力扩展方式：
 - **MCP** 用于**能力扩展**：连接 API、数据库、外部工具（需要编码+服务器）
@@ -38,6 +45,7 @@ MCP 与 [[agent/skills/Skills]] 是 Agent 生态中互补的两种能力扩展�
 - [[agent/harness/Agent_三层架构]] — MCP 连接思考层（决策）和执行层（工具）
 - [[agent/prompt/上下文工程]] — MCP 管理的工具定义是上下文的重要组成部分
 - [[agent/skills/Skills]] — MCP 用于能力扩展，Skills 用于知识复用，二者互补
+- [[a2a/README]] — A2A 协议知识库（横向的 agent↔agent，与 MCP 互补）
 
 ## 来源
 - [[agent/sources/菜鸟教程_AI_Agent系列]] — AI 底层架构篇

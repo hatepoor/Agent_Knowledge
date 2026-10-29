@@ -40,10 +40,20 @@ agent = create_agent(
 result = agent.invoke(
     {"messages": [{"role": "user", "content": "What's the weather in San Francisco?"}]}
 )
-print(result["messages"][-1][[.content_blocks)
+print(result["messages"][-1].content)
 ```
 
 参考 [[langchain/install/安装LangChain|安装指南]] 和 [[langchain/quickstart/快速入门|快速入门]] 开始构建自定义 Agent 和应用。
+
+## ⚠️ 本页是 Python 版
+
+⚠️ **本页及其所属目录讲的是 Python 版 LangChain。** LangChain 同时有官方 **JS/TS 版（LangChain.js v1）**，API 形态相近但**不是逐行翻译**（工具定义从 `@tool` 装饰器变成 `tool()` 调用式、schema 从 Pydantic 变成 Zod、中间件创建方式不同）。
+
+| 你要写的语言 | 从哪开始 |
+|-------------|---------|
+| **Python** | 本页 → [[langchain/quickstart/快速入门]] |
+| **TypeScript / JavaScript** | ⭐ [[typescript/03-生态连接-LangChain与LangGraph/1-TypeScript生态定位与选型|TypeScript 生态定位与选型]] → [[typescript/03-生态连接-LangChain与LangGraph/2-LangChain-js核心API实战|LangChain.js 核心 API 实战]] |
+| **两边都要 / 做双栈选型** | [[typescript/03-生态连接-LangChain与LangGraph/6-Python与TypeScript双栈对照|Python 与 TypeScript 双栈对照]] |
 
 ## 相关页面
 
@@ -51,3 +61,5 @@ print(result["messages"][-1][[.content_blocks)
 - [[langchain/agents/Agent代理]] — Agent 核心组件详解
 - [[langchain/tools/工具]] — 工具定义与使用
 - [[langchain/models/模型]] — 模型配置与管理
+- [[typescript/03-生态连接-LangChain与LangGraph/1-TypeScript生态定位与选型]] — ⭐ TypeScript 侧的 LangChain.js 选型与双栈协作
+- [[typescript/03-生态连接-LangChain与LangGraph/6-Python与TypeScript双栈对照]] — ⭐ Python ↔ TypeScript 完整 API 对照表

@@ -56,7 +56,7 @@ Harness Engineering 的完整知识分为三个层次：
 ## 未来趋势
 
 1. **从"Prompt 工程师"到"Agent 工程师"**：岗位正在快速转型
-2. **从"工具调用"到"Agent 协作协议"**：MCP → A2A 的标准化演进
+2. **从"工具调用"到"Agent 协作协议"**：MCP → A2A 的标准化演进（详见 [[a2a/README|A2A 协议知识库]]；判定规则见 [[a2a/02-中段阶段-生产实践/03-A2A与MCP选型决策树]]）
 3. **从"单 Agent"到"Agent 操作系统"**：Shell + Scheduler + System Calls
 4. **模型与 Harness 接口标准化**：Agent 工程进入工业化阶段
 

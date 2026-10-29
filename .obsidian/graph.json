@@ -6,7 +6,92 @@
   "hideUnresolved": false,
   "showOrphans": true,
   "collapse-color-groups": false,
-  "colorGroups": [],
+  "colorGroups": [
+    {
+      "query": "[type:moc] OR [type:index]",
+      "color": {
+        "a": 1,
+        "rgb": 11032055
+      }
+    },
+    {
+      "query": "file:\"README.md\" OR file:\"index.md\"",
+      "color": {
+        "a": 1,
+        "rgb": 11032055
+      }
+    },
+    {
+      "query": "path:wiki/langchain",
+      "color": {
+        "a": 1,
+        "rgb": 6514417
+      }
+    },
+    {
+      "query": "path:wiki/langgraph",
+      "color": {
+        "a": 1,
+        "rgb": 3900150
+      }
+    },
+    {
+      "query": "path:wiki/deepagents",
+      "color": {
+        "a": 1,
+        "rgb": 9133302
+      }
+    },
+    {
+      "query": "path:wiki/python",
+      "color": {
+        "a": 1,
+        "rgb": 16096779
+      }
+    },
+    {
+      "query": "path:wiki/agent",
+      "color": {
+        "a": 1,
+        "rgb": 15357964
+      }
+    },
+    {
+      "query": "path:wiki/fastapi",
+      "color": {
+        "a": 1,
+        "rgb": 8702998
+      }
+    },
+    {
+      "query": "path:wiki/postgresql",
+      "color": {
+        "a": 1,
+        "rgb": 959977
+      }
+    },
+    {
+      "query": "path:wiki/docker",
+      "color": {
+        "a": 1,
+        "rgb": 1357990
+      }
+    },
+    {
+      "query": "path:wiki/rag",
+      "color": {
+        "a": 1,
+        "rgb": 14753096
+      }
+    },
+    {
+      "query": "path:wiki/redis",
+      "color": {
+        "a": 1,
+        "rgb": 16281969
+      }
+    }
+  ],
   "collapse-display": true,
   "showArrow": false,
   "textFadeMultiplier": 0,
